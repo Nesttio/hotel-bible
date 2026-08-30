@@ -880,7 +880,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
   var lockInput = document.getElementById('lock-input');
   var lockError = document.getElementById('lock-error');
   var unlocked = false;
-  try { unlocked = localStorage.getItem(LOCK_KEY) === '1'; } catch (e) {}
+  try { unlocked = sessionStorage.getItem(LOCK_KEY) === '1'; } catch (e) {}
   if (unlocked) {
     lockScreen.hidden = true;
     shell.hidden = false;
@@ -890,7 +890,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
   lockForm.addEventListener('submit', function (e) {
     e.preventDefault();
     if (lockInput.value === PASSWORD) {
-      try { localStorage.setItem(LOCK_KEY, '1'); } catch (e) {}
+      try { sessionStorage.setItem(LOCK_KEY, '1'); } catch (e) {}
       lockScreen.hidden = true;
       shell.hidden = false;
       lockError.hidden = true;
