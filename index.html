@@ -257,6 +257,18 @@ details.step.open .step-num{background:var(--accent); color:var(--surface-2)}
 .subtab-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
 .hint{font-family:var(--font-mono); font-size:.7rem; color:var(--ink-3); margin:-.6rem 0 1.2rem}
 
+.cal-subtab-btn{
+  display:inline-flex; align-items:center; gap:.4rem; background:var(--surface); border:1px solid var(--line);
+  border-radius:20px; padding:.4rem .9rem .4rem .7rem; font-family:var(--font-body); font-size:.85rem; color:var(--ink-2);
+  cursor:pointer; transition:all .15s ease;
+}
+.cal-subtab-btn svg{flex:none; width:14px; height:14px}
+.cal-subtab-btn:hover{border-color:var(--ink-3); color:var(--ink)}
+.cal-subtab-btn.active{background:var(--accent); border-color:var(--accent); color:var(--surface-2); font-weight:500}
+.cal-subtab-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.today-shell{display:grid; grid-template-columns:280px 1fr; gap:1.6rem; align-items:start}
+@media (max-width:760px){.today-shell{grid-template-columns:1fr}}
+
 /* ============ composers / forms ============ */
 .idea-composer, .task-composer, .file-composer{display:flex; flex-direction:column; gap:.7rem; align-items:flex-start; margin-bottom:1.8rem}
 textarea, input[type="text"], input[type="date"], select.sel{
@@ -296,6 +308,9 @@ input[type="date"]{color-scheme:var(--input-scheme); font-family:var(--font-mono
 .ico-btn.labeled span{white-space:nowrap}
 .ico-btn.labeled.ok:hover{color:var(--ok); border-color:var(--ok); background:var(--ok-tint)}
 .ico-btn.labeled.danger:hover{color:var(--danger); border-color:var(--danger); background:var(--danger-tint)}
+.ico-btn.ok:hover{color:var(--ok); border-color:var(--ok); background:var(--ok-tint)}
+.task-toggle .c-chevron{transition:transform .2s ease}
+.task-toggle.open .c-chevron{transform:rotate(90deg); color:var(--accent)}
 .task-item.overdue{border-color:var(--danger-tint); background:var(--danger-tint)}
 
 .task-composer-row{display:flex; align-items:center; gap:.8rem; width:100%; flex-wrap:wrap}
@@ -346,7 +361,7 @@ input[type="date"]{color-scheme:var(--input-scheme); font-family:var(--font-mono
 .task-more summary::-webkit-details-marker{display:none}
 .task-more[open] summary svg{transform:rotate(90deg)}
 .task-more summary svg{transition:transform .15s ease}
-.task-more-body{padding:.5rem 0 .2rem 2.35rem}
+.task-more-body{padding:.3rem .9rem .9rem 2.6rem}
 details.task-archive{margin-top:1.6rem; border-top:1px solid var(--line); padding-top:1rem}
 details.task-archive > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); margin-bottom:.9rem}
 details.task-archive > summary::-webkit-details-marker{display:none}
@@ -479,7 +494,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       </div>
     </div>
     <nav class="nav-group">
-      <p class="nav-label">Библия проекта</p>
+      <p class="nav-label">Документация проекта</p>
       <ul class="nav-list" role="tablist">
         <li><button type="button" class="nav-btn active" data-tab="story" role="tab" aria-selected="true"><svg><use href="#i-book"></use></svg>Сюжет</button></li>
         <li><button type="button" class="nav-btn" data-tab="tech" role="tab" aria-selected="false"><svg><use href="#i-tasks"></use></svg>Технический</button></li>
@@ -840,26 +855,43 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
         <h1 class="view-title">Календарь</h1>
         <p class="view-sub">Нажми на число, чтобы назначить задачу, файл, референс или текстуру на этот день, или отметить выходной, больничный, отпуск</p>
 
-        <div class="cal-shell">
-          <div class="cal-grid-col">
-            <div class="cal-nav">
-              <button type="button" class="ico-btn" id="cal-prev" title="Предыдущий месяц" aria-label="Предыдущий месяц"><svg><use href="#i-left"></use></svg></button>
-              <p class="cal-month-label" id="cal-month-label"></p>
-              <button type="button" class="ico-btn" id="cal-next" title="Следующий месяц" aria-label="Следующий месяц"><svg><use href="#i-right"></use></svg></button>
-              <span class="cal-legend"><i class="cal-dot"></i>назначено</span>
-            </div>
-            <div class="cal-weekdays">
-              <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
-            </div>
-            <div class="cal-cells" id="cal-cells"></div>
+        <div class="subtabs" role="tablist">
+          <button type="button" class="cal-subtab-btn active" data-cal-subtab="month" role="tab" aria-selected="true"><svg><use href="#i-calendar"></use></svg>Месяц</button>
+          <button type="button" class="cal-subtab-btn" data-cal-subtab="today" role="tab" aria-selected="false"><svg><use href="#i-sun"></use></svg>Сегодня</button>
+        </div>
 
-            <details class="task-archive">
-              <summary><span class="c-title">Архив по дням</span><span class="c-chevron">›</span></summary>
-              <div class="task-list" id="cal-archive-list"></div>
-            </details>
+        <div class="cal-subtab-panel" data-cal-subtab="month">
+          <div class="cal-shell">
+            <div class="cal-grid-col">
+              <div class="cal-nav">
+                <button type="button" class="ico-btn" id="cal-prev" title="Предыдущий месяц" aria-label="Предыдущий месяц"><svg><use href="#i-left"></use></svg></button>
+                <p class="cal-month-label" id="cal-month-label"></p>
+                <button type="button" class="ico-btn" id="cal-next" title="Следующий месяц" aria-label="Следующий месяц"><svg><use href="#i-right"></use></svg></button>
+                <span class="cal-legend"><i class="cal-dot"></i>назначено</span>
+              </div>
+              <div class="cal-weekdays">
+                <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+              </div>
+              <div class="cal-cells" id="cal-cells"></div>
+
+              <details class="task-archive">
+                <summary><span class="c-title">Архив по дням</span><span class="c-chevron">›</span></summary>
+                <div class="task-list" id="cal-archive-list"></div>
+              </details>
+            </div>
+
+            <aside class="cal-day-panel" id="cal-day-panel"></aside>
           </div>
+        </div>
 
-          <aside class="cal-day-panel" id="cal-day-panel"></aside>
+        <div class="cal-subtab-panel" data-cal-subtab="today" hidden>
+          <div class="today-shell">
+            <aside class="cal-day-panel" id="today-day-panel"></aside>
+            <div>
+              <p class="cal-day-label">Задачи со сроком сегодня</p>
+              <div class="task-list" id="today-tasks-list"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -904,34 +936,9 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
 
 (function () {
   var MAX_BYTES = 25 * 1024 * 1024;
-  var SEED_TASKS = [
-    ['2026-09-01', 'Решить: почему Посторонний закрыл дверь', 'Специально, зная, что внутри кто-то есть, или случайно, не подозревая о последствиях — от этого зависит тон финала.'],
-    ['2026-09-02', 'Решить схему финала и мести', 'Посторонний реально угрожает жизни ГГ (месть заодно самозащита), или ГГ сам приходит к нему без внешней угрозы.'],
-    ['2026-09-03', 'Решить баланс вины', 'Гордость ГГ и поступок Постороннего — два отдельных источника вины, которые складываются, или вина смещается на Постороннего после того, как ГГ о нём узнаёт.'],
-    ['2026-09-04', 'Придумать завязку игры', 'Что происходит до вступительной смены — сцена, вводящая игрока в отель и роль Эрика.'],
-    ['2026-09-07', 'Решить роль Эрика', 'Оставлять ли за ним функцию охранника или он просто администратор — если второе, обосновать обходы по отелю (например, единственный на ночной смене).'],
-    ['2026-09-08', 'Решить, есть ли у Эрика другие друзья', 'Райан был единственным по-настоящему близким другом, или есть другие — важно для флэшбэков и диалогов.'],
-    ['2026-09-09', 'Прописать содержимое телефона Эрика', 'Конкретные тексты сообщений и контактов — сейчас известно только, что информация там есть, но не что именно.'],
-    ['2026-09-10', 'Привязать искажения к комнатам', 'Кухня, склад, ресторан, туалет, лобби — определить, какой кусок травмы триггерится в каком помещении.'],
-    ['2026-09-11', 'Блокаут ресепшена в Godot', 'Геометрия зоны стойки: стойка, монитор, пространство вокруг, проходы.'],
-    ['2026-09-14', 'Блокаут склада', 'Полки, коробки, инвентарь отеля — локация из шага 3 вступления.'],
-    ['2026-09-15', 'Блокаут номера 214', 'Кровать, окно, светильник, стул — локация из шага 4 вступления.'],
-    ['2026-09-16', 'Система взаимодействия по F', 'Подбор предметов с полки и использование их на месте, без отдельного окна инвентаря.'],
-    ['2026-09-17', 'Сайт отеля на компьютере ресепшена', 'Раздел «Жалобы»: список заголовков + разворачивающиеся карточки с именем, номером, текстом и временем.'],
-    ['2026-09-18', 'Остальные разделы сайта отеля', 'Помимо «Жалоб» — решить, какие ещё разделы видны на рабочем столе Windows 7 у Эрика.'],
-    ['2026-09-21', 'Механика замены лампочки', 'Взять стул → поставить под лампу → вкрутить лампочку → анимация → вернуть стул на место.'],
-    ['2026-09-22', 'Деталь «не на месте» (шаг 6)', 'Придумать и реализовать первую деталь, которую замечает Эрик, вернувшись за стойку.'],
-    ['2026-09-23', 'Собрать вступление целиком', 'Шаги 1–6 из раскадровки — от начала смены до детали не на месте, в едином прогоне в движке.'],
-    ['2026-09-24', 'Внутренний монолог Эрика', 'Фоновые дефолтные мысли о работе на время вступления — текст и триггеры показа.'],
-    ['2026-09-28', 'Первый плейтест вступления', 'Прогнать собранный вертикальный срез на живом человеке, зафиксировать реакции.'],
-    ['2026-09-29', 'Разбор плейтеста', 'Собрать список правок по итогам тестирования вступления.'],
-    ['2026-09-30', 'Спланировать задачи на октябрь', 'Роадмап следующего месяца разработки после готового вступления.']
-  ].map(function (t, i) {
-    return { id: 'seed-' + i, title: t[1], description: t[2], dueDate: t[0], image: null, createdAt: '30.08.2026, 12:00' };
-  });
   var state = {
     tech: [], ideas: [], extra: [],
-    tasks: SEED_TASKS, tasksArchive: [],
+    tasks: [], tasksArchive: [],
     files: [], refs: [], textures: [],
     calendar: [], calendarArchive: [], dayMarks: []
   };
@@ -1133,6 +1140,54 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     return moved;
   }
 
+  function taskRowHtml(t) {
+    var more = t.description || t.image;
+    return '<div class="task-item" data-id="' + t.id + '">'
+      + '<div class="task-row">'
+      + (more ? '<button type="button" class="ico-btn ghost task-toggle" data-action="toggle-more" title="Подробнее" aria-label="Подробнее"><svg class="c-chevron"><use href="#i-right"></use></svg></button>' : '')
+      + '<div class="task-main">'
+      + '<div class="task-title">' + escapeHtml(t.title) + '</div>'
+      + '<div class="task-meta">'
+      + (t.dueDate ? '<span class="task-due"><svg width="12" height="12"><use href="#i-clock"></use></svg>' + escapeHtml(t.dueDate) + '</span>' : '')
+      + '<span>Добавлено ' + escapeHtml(t.createdAt) + '</span>'
+      + '</div></div>'
+      + '<div class="task-actions">'
+      + '<button type="button" class="ico-btn ghost ok" data-action="done" title="Готово" aria-label="Отметить выполненной"><svg><use href="#i-check"></use></svg></button>'
+      + '<button type="button" class="ico-btn ghost danger" data-action="reject" title="Отменить" aria-label="Отменить задачу"><svg><use href="#i-x"></use></svg></button>'
+      + '</div>'
+      + '</div>'
+      + (more ? ('<div class="task-more-body" hidden>'
+          + (t.description ? '<div class="task-desc">' + escapeHtml(t.description) + '</div>' : '')
+          + (t.image ? '<img class="task-image" src="' + t.image + '" alt="">' : '')
+          + '</div>') : '')
+      + '</div>';
+  }
+
+  function taskListClick(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var item = btn.closest('.task-item');
+    var id = item.dataset.id;
+    if (btn.dataset.action === 'toggle-more') {
+      var body = item.querySelector('.task-more-body');
+      if (body) { body.hidden = !body.hidden; btn.classList.toggle('open', !body.hidden); }
+      return;
+    }
+    var idx = state.tasks.findIndex(function (t) { return t.id === id; });
+    if (idx === -1) return;
+    if (btn.dataset.action === 'done') {
+      var t = state.tasks.splice(idx, 1)[0];
+      t.completedAt = nowStr();
+      state.tasksArchive.unshift(t);
+    } else if (btn.dataset.action === 'reject') {
+      state.tasks.splice(idx, 1);
+    } else {
+      return;
+    }
+    renderTasks();
+    persist();
+  }
+
   function renderTasks() {
     if (archiveOverdueTasks()) persist();
     var el = document.getElementById('task-list');
@@ -1140,25 +1195,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     if (!items.length) {
       el.innerHTML = '<p class="idea-empty">Нет активных задач.</p>';
     } else {
-      el.innerHTML = items.map(function (t) {
-        var more = t.description || t.image;
-        return '<div class="task-item" data-id="' + t.id + '">'
-          + '<div class="task-row">'
-          + '<button type="button" class="ico-btn ghost labeled ok" data-action="done" title="Отметить выполненной" aria-label="Отметить выполненной"><svg><use href="#i-circle"></use></svg><span>Готово</span></button>'
-          + '<div class="task-main">'
-          + '<div class="task-title">' + escapeHtml(t.title) + '</div>'
-          + '<div class="task-meta">'
-          + (t.dueDate ? '<span class="task-due"><svg width="12" height="12"><use href="#i-clock"></use></svg>' + escapeHtml(t.dueDate) + '</span>' : '')
-          + '<span>Добавлено ' + escapeHtml(t.createdAt) + '</span>'
-          + '</div></div>'
-          + '<button type="button" class="ico-btn ghost danger labeled" data-action="reject" title="Отменить задачу" aria-label="Отменить задачу"><svg><use href="#i-trash"></use></svg><span>Отменить</span></button>'
-          + '</div>'
-          + (more ? ('<details class="task-more"><summary><svg width="13" height="13"><use href="#i-right"></use></svg>Подробнее</summary><div class="task-more-body">'
-              + (t.description ? '<div class="task-desc">' + escapeHtml(t.description) + '</div>' : '')
-              + (t.image ? '<img class="task-image" src="' + t.image + '" alt="">' : '')
-              + '</div></details>') : '')
-          + '</div>';
-      }).join('');
+      el.innerHTML = items.map(function (t) { return taskRowHtml(t); }).join('');
     }
     var archiveEl = document.getElementById('task-archive-list');
     var arch = state.tasksArchive;
@@ -1186,6 +1223,17 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
           + '</div>';
       }).join('');
     }
+    renderTodayTasks();
+  }
+
+  function renderTodayTasks() {
+    var el = document.getElementById('today-tasks-list');
+    if (!el) return;
+    var today = todayISO();
+    var items = state.tasks.filter(function (t) { return t.dueDate === today; });
+    el.innerHTML = items.length
+      ? items.map(function (t) { return taskRowHtml(t); }).join('')
+      : '<p class="idea-empty">На сегодня задач нет.</p>';
   }
 
   function renderFiles() {
@@ -1254,6 +1302,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     renderCalendarMonth();
     renderCalDayPanel();
     renderCalArchive();
+    renderTodayPanel();
   }
 
   function formatCalDate(iso) {
@@ -1314,9 +1363,9 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     }).join('');
   }
 
-  function populateCalDayItems() {
-    var kindEl = document.getElementById('cal-day-kind');
-    var sel = document.getElementById('cal-day-item');
+  function populateDayItems(prefix) {
+    var kindEl = document.getElementById(prefix + '-kind');
+    var sel = document.getElementById(prefix + '-item');
     if (!kindEl || !sel) return;
     var kind = kindEl.value;
     var opts = [];
@@ -1339,10 +1388,9 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     }).join('');
   }
 
-  function renderCalDayPanel() {
-    var panel = document.getElementById('cal-day-panel');
+  function renderDayPanel(panelId, prefix, dateStr, onChange) {
+    var panel = document.getElementById(panelId);
     if (!panel) return;
-    var dateStr = calSelectedDate;
     var parts = dateStr.split('-');
     var dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
     var weekday = WEEKDAY_NAMES[dObj.getDay()];
@@ -1373,17 +1421,17 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       + (mark
         ? '<p class="cal-day-locked">День отмечен как «' + escapeHtml(CAL_MARK_FULL[mark]) + '» — назначать задачи, файлы и референсы на такой день нельзя. Снимите отметку, чтобы назначить что-то.</p>'
         : ('<div class="cal-day-composer">'
-          + '<select class="sel" id="cal-day-kind"><option value="task">Задача</option><option value="file">Файл</option><option value="ref">Референс</option><option value="texture">Текстура</option></select>'
-          + '<select class="sel" id="cal-day-item"></select>'
-          + '<button type="button" class="btn" id="cal-day-add"><svg width="15" height="15"><use href="#i-plus"></use></svg>Назначить</button>'
+          + '<select class="sel" id="' + prefix + '-kind"><option value="task">Задача</option><option value="file">Файл</option><option value="ref">Референс</option><option value="texture">Текстура</option></select>'
+          + '<select class="sel" id="' + prefix + '-item"></select>'
+          + '<button type="button" class="btn" id="' + prefix + '-add"><svg width="15" height="15"><use href="#i-plus"></use></svg>Назначить</button>'
           + '</div>'));
 
-    if (!mark) populateCalDayItems();
+    if (!mark) populateDayItems(prefix);
 
     panel.querySelectorAll('.cal-mark-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
         setDayMark(dateStr, btn.dataset.mark === 'work' ? null : btn.dataset.mark);
-        renderCalDayPanel();
+        onChange();
         renderCalendarMonth();
         persist();
       });
@@ -1397,7 +1445,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
         c.status = 'done';
         c.completedAt = nowStr();
         state.calendarArchive.unshift(c);
-        renderCalDayPanel();
+        onChange();
         renderCalendarMonth();
         renderCalArchive();
         persist();
@@ -1407,25 +1455,32 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       btn.addEventListener('click', function () {
         var id = btn.closest('.cal-day-item').dataset.id;
         state.calendar = state.calendar.filter(function (c) { return c.id !== id; });
-        renderCalDayPanel();
+        onChange();
         renderCalendarMonth();
         persist();
       });
     });
-    var dayKindEl = document.getElementById('cal-day-kind');
-    if (dayKindEl) dayKindEl.addEventListener('change', populateCalDayItems);
-    var dayAddBtn = document.getElementById('cal-day-add');
+    var dayKindEl = document.getElementById(prefix + '-kind');
+    if (dayKindEl) dayKindEl.addEventListener('change', function () { populateDayItems(prefix); });
+    var dayAddBtn = document.getElementById(prefix + '-add');
     if (dayAddBtn) dayAddBtn.addEventListener('click', function () {
-      var kindEl = document.getElementById('cal-day-kind');
-      var itemEl = document.getElementById('cal-day-item');
+      var kindEl = document.getElementById(prefix + '-kind');
+      var itemEl = document.getElementById(prefix + '-item');
       var itemId = itemEl.value;
       if (!itemId) { setStatus('Выбери элемент для этого дня.', true); return; }
       var label = itemEl.options[itemEl.selectedIndex].textContent;
       state.calendar.push({ id: uid(), date: dateStr, refType: kindEl.value, refId: itemId, label: label, status: 'pending', createdAt: nowStr() });
-      renderCalDayPanel();
+      onChange();
       renderCalendarMonth();
       persist();
     });
+  }
+
+  function renderCalDayPanel() {
+    renderDayPanel('cal-day-panel', 'cal-day', calSelectedDate, renderCalDayPanel);
+  }
+  function renderTodayPanel() {
+    renderDayPanel('today-day-panel', 'today-day', todayISO(), renderTodayPanel);
   }
 
   function renderCalArchive() {
@@ -1547,7 +1602,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       panels.forEach(function (p) { p.hidden = (p.dataset.tab !== btn.dataset.tab); });
-      if (btn.dataset.tab === 'calendar') { renderCalendarMonth(); renderCalDayPanel(); }
+      if (btn.dataset.tab === 'calendar') { renderCalendarMonth(); renderCalDayPanel(); renderTodayPanel(); renderTodayTasks(); }
       window.scrollTo(0, 0);
     });
   });
@@ -1560,6 +1615,18 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       subpanels.forEach(function (p) { p.hidden = (p.dataset.subtab !== btn.dataset.subtab); });
+    });
+  });
+
+  var calSubtabBtns = document.querySelectorAll('.cal-subtab-btn');
+  var calSubpanels = document.querySelectorAll('.cal-subtab-panel');
+  calSubtabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      calSubtabBtns.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      calSubpanels.forEach(function (p) { p.hidden = (p.dataset.calSubtab !== btn.dataset.calSubtab); });
+      if (btn.dataset.calSubtab === 'today') { renderTodayPanel(); renderTodayTasks(); }
     });
   });
 
@@ -1584,23 +1651,8 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     renderTasks();
     persist();
   });
-  document.getElementById('task-list').addEventListener('click', function (e) {
-    var btn = e.target.closest('button');
-    if (!btn) return;
-    var item = btn.closest('.task-item');
-    var id = item.dataset.id;
-    var idx = state.tasks.findIndex(function (t) { return t.id === id; });
-    if (idx === -1) return;
-    if (btn.dataset.action === 'done') {
-      var t = state.tasks.splice(idx, 1)[0];
-      t.completedAt = nowStr();
-      state.tasksArchive.unshift(t);
-    } else if (btn.dataset.action === 'reject') {
-      state.tasks.splice(idx, 1);
-    }
-    renderTasks();
-    persist();
-  });
+  document.getElementById('task-list').addEventListener('click', taskListClick);
+  document.getElementById('today-tasks-list').addEventListener('click', taskListClick);
   document.getElementById('task-archive-list').addEventListener('click', function (e) {
     var btn = e.target.closest('button[data-action="delete"]');
     if (!btn) return;
