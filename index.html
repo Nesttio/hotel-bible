@@ -1,0 +1,1697 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Отель — библия проекта</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,460;9..144,560&family=Newsreader:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#eceeec;
+  --surface:#e0e3e0;
+  --surface-2:#f4f5f3;
+  --ink:#1b201d;
+  --ink-2:#5a625c;
+  --ink-3:#888f89;
+  --accent:#a8501e;
+  --accent-ink:#7c3b16;
+  --accent-tint:rgba(168,80,30,.10);
+  --accent-tint-strong:rgba(168,80,30,.20);
+  --line:rgba(27,32,29,.14);
+  --line-2:rgba(27,32,29,.30);
+  --danger:#a13a2c;
+  --danger-tint:rgba(161,58,44,.12);
+  --ok:#4c7a5f;
+  --ok-tint:rgba(76,122,95,.14);
+  --shadow:0 1px 2px rgba(20,20,18,.06), 0 6px 20px rgba(20,20,18,.06);
+  --input-scheme:light;
+
+  --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:'Newsreader', Georgia, serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --radius:5px;
+  --sidebar-w:250px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181a;
+    --surface:#1d2124;
+    --surface-2:#24282b;
+    --ink:#e9e6dd;
+    --ink-2:#a29c8f;
+    --ink-3:#726d63;
+    --accent:#dd8b46;
+    --accent-ink:#f0ac70;
+    --accent-tint:rgba(221,139,70,.14);
+    --accent-tint-strong:rgba(221,139,70,.24);
+    --line:rgba(233,230,221,.11);
+    --line-2:rgba(233,230,221,.24);
+    --danger:#cd7d67;
+    --danger-tint:rgba(205,125,103,.14);
+    --ok:#8bb59c;
+    --ok-tint:rgba(139,181,156,.14);
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    --input-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181a;
+  --surface:#1d2124;
+  --surface-2:#24282b;
+  --ink:#e9e6dd;
+  --ink-2:#a29c8f;
+  --ink-3:#726d63;
+  --accent:#dd8b46;
+  --accent-ink:#f0ac70;
+  --accent-tint:rgba(221,139,70,.14);
+  --accent-tint-strong:rgba(221,139,70,.24);
+  --line:rgba(233,230,221,.11);
+  --line-2:rgba(233,230,221,.24);
+  --danger:#cd7d67;
+  --danger-tint:rgba(205,125,103,.14);
+  --ok:#8bb59c;
+  --ok-tint:rgba(139,181,156,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+  --input-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#eceeec;
+  --surface:#e0e3e0;
+  --surface-2:#f4f5f3;
+  --ink:#1b201d;
+  --ink-2:#5a625c;
+  --ink-3:#888f89;
+  --accent:#a8501e;
+  --accent-ink:#7c3b16;
+  --accent-tint:rgba(168,80,30,.10);
+  --accent-tint-strong:rgba(168,80,30,.20);
+  --line:rgba(27,32,29,.14);
+  --line-2:rgba(27,32,29,.30);
+  --danger:#a13a2c;
+  --danger-tint:rgba(161,58,44,.12);
+  --ok:#4c7a5f;
+  --ok-tint:rgba(76,122,95,.14);
+  --shadow:0 1px 2px rgba(20,20,18,.06), 0 6px 20px rgba(20,20,18,.06);
+  --input-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  font-feature-settings:'tnum' 1;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--accent-tint-strong)}
+a{color:var(--accent-ink)}
+h1,h2,h3{font-family:var(--font-display); font-weight:460; text-wrap:balance; margin:0}
+@media (prefers-reduced-motion:no-preference){
+  .reveal{animation:fadeUp .5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes emberPulse{0%,100%{opacity:.5}50%{opacity:1}}
+}
+
+/* ============ app shell ============ */
+.shell{display:flex; min-height:100vh}
+.sidebar{
+  width:var(--sidebar-w); flex:none;
+  background:var(--surface);
+  border-right:1px solid var(--line);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+}
+.brand{padding:1.5rem 1.25rem 1.1rem; border-bottom:1px solid var(--line)}
+.brand-mark{display:flex; align-items:center; gap:.55rem; margin-bottom:.85rem}
+.brand-lamp{width:9px;height:9px;border-radius:50%;background:var(--accent); box-shadow:0 0 0 3px var(--accent-tint); animation:emberPulse 3.6s ease-in-out infinite; flex:none}
+.brand-name{font-family:var(--font-display); font-size:1.5rem; font-weight:460; letter-spacing:-.01em}
+.brand-meta{display:flex; flex-direction:column; gap:.3rem; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.03em; color:var(--ink-2)}
+.brand-meta b{color:var(--ink); font-weight:500}
+
+.nav-group{padding:1rem .75rem}
+.nav-label{font-family:var(--font-mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); padding:0 .5rem; margin-bottom:.4rem}
+.nav-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px}
+.nav-btn{
+  width:100%; display:flex; align-items:center; gap:.65rem;
+  background:none; border:1px solid transparent; border-radius:4px;
+  padding:.55rem .6rem; font-family:var(--font-body); font-size:.92rem; color:var(--ink-2);
+  cursor:pointer; text-align:left; transition:background .15s ease, color .15s ease, border-color .15s ease;
+}
+.nav-btn svg{flex:none; width:16px; height:16px; opacity:.85}
+.nav-btn:hover{background:var(--surface-2); color:var(--ink)}
+.nav-btn.active{color:var(--accent-ink); background:var(--accent-tint); border-color:var(--accent-tint-strong); font-weight:500}
+.nav-btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+
+.sidebar-foot{margin-top:auto; padding:1rem .75rem 1.25rem; border-top:1px solid var(--line)}
+.theme-btn{
+  width:100%; display:flex; align-items:center; gap:.6rem; justify-content:center;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+  padding:.55rem .7rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-2); cursor:pointer; transition:border-color .15s ease, color .15s ease;
+}
+.theme-btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+.theme-btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.save-status{font-family:var(--font-mono); font-size:.66rem; color:var(--ink-3); min-height:1.4em; margin-top:.6rem; text-align:center}
+.save-status.error{color:var(--danger)}
+
+.main{flex:1; min-width:0}
+.main-inner{max-width:920px; margin:0 auto; padding:2.6rem 2.4rem 6rem}
+.view-title{font-size:clamp(1.6rem,3vw,2.1rem); margin-bottom:.3rem}
+.view-sub{font-family:var(--font-mono); font-size:.78rem; color:var(--ink-2); margin-bottom:2.2rem}
+
+/* mobile topbar */
+.topbar{display:none}
+@media (max-width:880px){
+  .shell{flex-direction:column}
+  .sidebar{position:static; width:100%; height:auto; flex-direction:row; align-items:center; overflow:visible; flex-wrap:wrap}
+  .brand{border-bottom:none; border-right:1px solid var(--line); padding:.9rem 1rem}
+  .brand-meta{display:none}
+  .nav-group{padding:.6rem; overflow-x:auto}
+  .nav-list{flex-direction:row}
+  .nav-btn{white-space:nowrap}
+  .sidebar-foot{margin-top:0; border-top:none; border-left:1px solid var(--line); padding:.6rem}
+  .save-status{display:none}
+  .main-inner{padding:1.6rem 1.2rem 4rem}
+}
+
+/* ============ story tab ============ */
+.story-toc{
+  background:var(--surface); border:1px solid var(--line); border-radius:6px;
+  padding:1.1rem 1.3rem; margin-bottom:2.6rem;
+}
+.story-toc-label{font-family:var(--font-mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-bottom:.7rem}
+.story-toc ol{list-style:none; margin:0; padding:0; columns:2; column-gap:1.5rem}
+.story-toc li{break-inside:avoid; margin-bottom:.15rem}
+.story-toc a{display:block; font-size:.87rem; color:var(--ink-2); text-decoration:none; padding:.2rem 0; border-bottom:1px solid transparent}
+.story-toc a:hover{color:var(--accent-ink)}
+
+.story section{max-width:66ch; padding-top:1.5rem; margin-top:0; border-top:1px solid var(--line); scroll-margin-top:1.5rem}
+.story section:first-of-type{border-top:none; padding-top:0}
+.section-tag{font-family:var(--font-mono); font-size:.7rem; letter-spacing:.1em; color:var(--accent); margin-bottom:.35rem}
+.story h2{font-size:1.34rem; margin-bottom:.6rem; letter-spacing:-.005em}
+.story p{margin:0 0 .75rem; font-size:1.01rem; line-height:1.58}
+.story .lede{color:var(--ink-2); font-style:italic; font-size:.96rem}
+.story b{font-weight:600; color:var(--ink)}
+
+.open-block{
+  background:var(--accent-tint); border:1px solid var(--accent-tint-strong); border-left:3px solid var(--accent);
+  border-radius:0 4px 4px 0; padding:.85rem 1.1rem; margin:.9rem 0;
+}
+.open-block p{margin:.5rem 0 0; font-size:.94rem; color:var(--ink)}
+.badge{display:inline-block; font-family:var(--font-mono); font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; padding:.2rem .5rem; border-radius:3px}
+.badge.open{background:var(--accent); color:var(--surface-2)}
+
+ul.questions{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.9rem}
+ul.questions li{font-size:.98rem; line-height:1.6; padding-left:0}
+.q-tag{display:inline-block; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-ink); background:var(--accent-tint); border-radius:3px; padding:.15rem .45rem; margin-right:.5rem; margin-bottom:.2rem}
+
+.dialogue{display:flex; flex-direction:column; gap:.55rem; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:1.2rem 1.3rem}
+.dialogue p{margin:0; display:flex; gap:.7rem; font-size:.94rem; line-height:1.55}
+.dialogue .who{flex:none; width:6.5rem; font-family:var(--font-mono); font-size:.68rem; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-3); padding-top:.2rem}
+.dialogue .guest .who{color:var(--accent-ink)}
+.dialogue .line{flex:1}
+
+.complaint-list{display:flex; flex-direction:column; gap:.5rem; margin-top:1rem}
+details.complaint, details.step{background:var(--surface); border:1px solid var(--line); border-radius:5px}
+details.complaint summary, details.step summary{
+  list-style:none; cursor:pointer; display:flex; align-items:center; gap:.6rem;
+  padding:.75rem .9rem; font-size:.9rem;
+}
+details.complaint summary::-webkit-details-marker, details.step summary::-webkit-details-marker{display:none}
+.c-title{flex:1; font-weight:500}
+.c-chevron{color:var(--ink-3); transition:transform .2s ease; font-family:var(--font-body)}
+details[open] .c-chevron{transform:rotate(90deg); color:var(--accent)}
+.c-body{padding:0 .9rem 1rem 2.4rem; display:flex; flex-direction:column; gap:.3rem}
+.c-body p{display:flex; gap:.6rem; margin:0; font-size:.88rem}
+.c-label{flex:none; width:8rem; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.03em; text-transform:uppercase; color:var(--ink-3); padding-top:.1rem}
+
+.steps{display:flex; flex-direction:column; gap:.4rem; margin:.9rem 0}
+details.step summary{gap:.8rem}
+.step-num{flex:none; width:1.7rem; height:1.7rem; border-radius:50%; background:var(--accent-tint); color:var(--accent-ink); font-family:var(--font-mono); font-size:.78rem; display:flex; align-items:center; justify-content:center}
+details.step.open .step-num{background:var(--accent); color:var(--surface-2)}
+.step-title{flex:1; font-weight:500}
+.step-time{flex:none; font-family:var(--font-mono); font-size:.68rem; color:var(--ink-3)}
+.step-body{padding:0 .9rem 1rem 3.4rem}
+.step-body p{margin:0 0 .6rem; font-size:.9rem; color:var(--ink-2)}
+.total-time{font-family:var(--font-mono); font-size:.82rem; color:var(--ink-2); margin-top:1rem}
+.total-time b{color:var(--accent-ink)}
+
+/* ============ subtabs (tech) ============ */
+.subtabs{display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.8rem}
+.subtab-btn{
+  display:inline-flex; align-items:center; gap:.4rem; background:var(--surface); border:1px solid var(--line);
+  border-radius:20px; padding:.4rem .9rem .4rem .7rem; font-family:var(--font-body); font-size:.85rem; color:var(--ink-2);
+  cursor:pointer; transition:all .15s ease;
+}
+.subtab-btn svg{flex:none; width:14px; height:14px}
+.subtab-btn:hover{border-color:var(--ink-3); color:var(--ink)}
+.subtab-btn.active{background:var(--accent); border-color:var(--accent); color:var(--surface-2); font-weight:500}
+.subtab-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.hint{font-family:var(--font-mono); font-size:.7rem; color:var(--ink-3); margin:-.6rem 0 1.2rem}
+
+/* ============ composers / forms ============ */
+.idea-composer, .task-composer, .file-composer{display:flex; flex-direction:column; gap:.7rem; align-items:flex-start; margin-bottom:1.8rem}
+textarea, input[type="text"], input[type="date"], select.sel{
+  width:100%; background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:4px;
+  padding:.65rem .8rem; font-family:var(--font-body); font-size:.94rem;
+}
+textarea{resize:vertical; min-height:4.2rem; line-height:1.5}
+textarea:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+input[type="date"]{color-scheme:var(--input-scheme); font-family:var(--font-mono)}
+
+.btn{
+  display:inline-flex; align-items:center; gap:.5rem; background:none; color:var(--accent-ink);
+  border:1px solid var(--accent); border-radius:4px; padding:.55rem 1.15rem;
+  font-family:var(--font-display); font-weight:560; font-size:.92rem; cursor:pointer; transition:background .15s ease;
+}
+.btn svg{width:15px; height:15px; flex:none}
+.btn:hover{background:var(--accent-tint)}
+.btn:active{background:var(--accent-tint-strong)}
+.btn:disabled{opacity:.4; cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.ico-btn{
+  display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; flex:none; padding:0;
+  background:none; border:1px solid var(--line); border-radius:4px; color:var(--ink-2); cursor:pointer;
+  transition:color .15s ease, border-color .15s ease, background .15s ease;
+}
+.ico-btn svg{width:15px; height:15px}
+.ico-btn:hover{color:var(--accent-ink); border-color:var(--accent)}
+.ico-btn.danger:hover{color:var(--danger); border-color:var(--danger)}
+.ico-btn:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+.ico-btn.ghost{border-color:transparent}
+.ico-btn.ghost:hover{background:var(--accent-tint)}
+.ico-btn.labeled{
+  width:auto; height:auto; padding:.4rem .7rem; gap:.4rem; border-color:var(--line);
+  font-family:var(--font-body); font-size:.82rem; font-weight:500; color:var(--ink-2);
+}
+.ico-btn.labeled span{white-space:nowrap}
+.ico-btn.labeled.ok:hover{color:var(--ok); border-color:var(--ok); background:var(--ok-tint)}
+.ico-btn.labeled.danger:hover{color:var(--danger); border-color:var(--danger); background:var(--danger-tint)}
+.task-item.overdue{border-color:var(--danger-tint); background:var(--danger-tint)}
+
+.task-composer-row{display:flex; align-items:center; gap:.8rem; width:100%; flex-wrap:wrap}
+.task-composer-row input[type="date"]{flex:1; min-width:8rem}
+.task-image{max-width:220px; max-height:220px; border-radius:4px; display:block; margin:.2rem 0 .4rem; border:1px solid var(--line)}
+.task-desc{font-size:.9rem; color:var(--ink); white-space:pre-wrap}
+
+.visually-hidden{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+.file-picker{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap}
+.file-picker-btn{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:.5rem .9rem;
+  font-family:var(--font-mono); font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink);
+  cursor:pointer; transition:border-color .15s ease, color .15s ease;
+}
+.file-picker-btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+.file-picker input:focus-visible + .file-picker-btn{outline:2px solid var(--accent); outline-offset:2px}
+.file-picker-name{font-family:var(--font-mono); font-size:.74rem; color:var(--ink-2)}
+.file-clear-btn{background:none; border:none; padding:0; font-family:var(--font-mono); font-size:.7rem; color:var(--ink-2); text-decoration:underline; text-underline-offset:2px; cursor:pointer}
+.file-clear-btn:hover{color:var(--danger)}
+.file-preview-wrap{position:relative; display:inline-block}
+.file-preview{max-width:160px; max-height:160px; border-radius:4px; display:block; margin:.4rem 0 .1rem; border:1px solid var(--line)}
+.file-preview-clear{position:absolute; top:.6rem; right:.3rem; width:24px; height:24px; border-radius:50%; border:none; background:rgba(0,0,0,.6); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center}
+.file-preview-clear:hover{background:var(--danger)}
+.file-preview-clear[hidden]{display:none}
+
+/* ============ lists (ideas / tech / extra) ============ */
+.idea-list, .task-list, .file-list{display:flex; flex-direction:column; gap:.4rem}
+.idea-item, .task-item, .file-item{
+  background:var(--surface); border:1px solid var(--line); border-radius:5px; min-height:2.7rem; padding:.55rem .7rem;
+  transition:background .2s ease;
+}
+.idea-item{display:flex; align-items:center; gap:.7rem}
+.idea-item:hover, .task-row:hover, .file-item:hover{background:var(--surface-2)}
+.idea-icon{flex:none; color:var(--accent-ink); opacity:.8}
+.idea-item .idea-text{white-space:pre-wrap; font-size:.92rem; flex:1; min-width:0}
+.idea-item .idea-time{flex:none; font-family:var(--font-mono); font-size:.64rem; color:var(--ink-3)}
+.idea-item .ico-btn{opacity:.5}
+.idea-item .ico-btn:hover{opacity:1}
+.idea-empty, .gallery-empty{color:var(--ink-2); font-style:italic; font-size:.92rem}
+
+.task-row{display:flex; align-items:center; gap:.7rem}
+.task-main{flex:1; min-width:0}
+.task-title{font-size:.94rem; font-weight:500}
+.task-meta{display:flex; gap:.9rem; font-family:var(--font-mono); font-size:.66rem; color:var(--ink-3); margin-top:.2rem}
+.task-due{display:inline-flex; align-items:center; gap:.3rem; color:var(--accent-ink)}
+.task-item.completed .task-title{color:var(--ink-2); text-decoration:line-through; text-decoration-color:var(--line-2)}
+.task-more summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:.4rem; font-family:var(--font-mono); font-size:.68rem; color:var(--ink-3); padding:.5rem 0 0 2.35rem}
+.task-more summary::-webkit-details-marker{display:none}
+.task-more[open] summary svg{transform:rotate(90deg)}
+.task-more summary svg{transition:transform .15s ease}
+.task-more-body{padding:.5rem 0 .2rem 2.35rem}
+details.task-archive{margin-top:1.6rem; border-top:1px solid var(--line); padding-top:1rem}
+details.task-archive > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:.5rem; font-family:var(--font-mono); font-size:.72rem; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-2); margin-bottom:.9rem}
+details.task-archive > summary::-webkit-details-marker{display:none}
+details.task-archive[open] > summary .c-chevron{transform:rotate(90deg)}
+
+.file-item{display:flex; align-items:center; gap:.8rem}
+.file-ext{flex:none; font-family:var(--font-mono); font-size:.62rem; font-weight:600; color:var(--accent-ink); background:var(--accent-tint); border-radius:3px; padding:.3rem .4rem; min-width:2.6rem; text-align:center}
+.file-main{flex:1; min-width:0}
+.file-name{font-size:.92rem; font-weight:500}
+.file-desc{font-size:.84rem; color:var(--ink-2); margin-top:.1rem}
+.file-meta{font-family:var(--font-mono); font-size:.64rem; color:var(--ink-3); margin-top:.2rem}
+.task-actions{display:flex; gap:.4rem; flex:none}
+
+/* ============ gallery (refs / textures) ============ */
+.gallery{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:1.1rem; text-align:center}
+.gallery-plate{background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:.6rem; display:inline-block; max-width:100%}
+.gallery-plate img{max-width:100%; max-height:360px; display:block; border-radius:2px; margin:0 auto}
+.gallery-desc{font-size:.88rem; color:var(--ink-2); margin-top:.8rem; max-width:46ch; margin-left:auto; margin-right:auto}
+.gallery-nav{display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem}
+.gallery-count{font-family:var(--font-mono); font-size:.72rem; color:var(--ink-3)}
+.gallery-del{margin-top:.6rem}
+.del-btn{background:none; border:none; color:var(--ink-3); cursor:pointer; display:inline-flex; align-items:center; gap:.3rem; font-family:var(--font-mono); font-size:.66rem; padding:.3rem}
+.del-btn:hover{color:var(--danger)}
+
+/* ============ calendar ============ */
+.cal-shell{display:grid; grid-template-columns:1fr 280px; gap:1.6rem; align-items:start}
+@media (max-width:760px){.cal-shell{grid-template-columns:1fr}}
+.cal-nav{display:flex; align-items:center; gap:.8rem; margin-bottom:1rem; flex-wrap:wrap}
+.cal-month-label{font-family:var(--font-display); font-size:1.15rem; text-transform:capitalize; flex:1; margin:0}
+.cal-legend{display:flex; gap:.9rem; font-family:var(--font-mono); font-size:.62rem; color:var(--ink-3); align-items:center}
+.cal-legend i.cal-dot{display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-right:.3rem}
+.cal-weekdays{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; font-family:var(--font-mono); font-size:.64rem; text-transform:uppercase; color:var(--ink-3); text-align:center; margin-bottom:4px}
+.cal-cells{display:grid; grid-template-columns:repeat(7,1fr); gap:4px}
+.cal-cell{
+  aspect-ratio:1; background:var(--surface); border:1px solid var(--line); border-radius:4px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:2px;
+  font-family:var(--font-mono); color:var(--ink); transition:border-color .15s ease, background .15s ease; position:relative;
+}
+.cal-cell:hover{border-color:var(--accent)}
+.cal-cell.out{color:var(--ink-3); opacity:.45}
+.cal-cell.today{border-color:var(--accent); border-width:1.5px}
+.cal-cell.selected{background:var(--accent-tint); border-color:var(--accent)}
+.cal-num{font-size:.82rem}
+.cal-mark{font-size:.52rem; letter-spacing:.02em; color:var(--ink-2); text-transform:uppercase}
+.cal-cell.mark-dayoff .cal-mark, .cal-cell.mark-sick .cal-mark, .cal-cell.mark-vacation .cal-mark{color:var(--accent-ink)}
+.cal-dots{display:flex; gap:2px; position:absolute; bottom:3px}
+.cal-dots span.cal-dot{width:4px; height:4px; border-radius:50%; background:var(--accent); display:block}
+
+.cal-day-panel{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:1.1rem; box-shadow:var(--shadow)}
+.cal-day-weekday{font-family:var(--font-mono); font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); margin:0}
+.cal-day-date{font-family:var(--font-display); font-size:1.3rem; margin:.15rem 0 1rem}
+.cal-day-label{font-family:var(--font-mono); font-size:.62rem; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); margin:1rem 0 .5rem}
+.cal-marks{display:flex; flex-wrap:wrap; gap:.35rem}
+.cal-mark-btn{
+  display:inline-flex; align-items:center; gap:.35rem; background:var(--surface-2); border:1px solid var(--line); border-radius:20px;
+  padding:.3rem .65rem; font-size:.76rem; color:var(--ink-2); cursor:pointer;
+}
+.cal-mark-btn.active{background:var(--accent); border-color:var(--accent); color:var(--surface-2)}
+.cal-day-items{display:flex; flex-direction:column; gap:.35rem}
+.cal-day-item{display:flex; align-items:center; gap:.5rem; font-size:.85rem; background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:.45rem .6rem}
+.cal-day-item.done .cal-item-title{color:var(--ink-2); text-decoration:line-through}
+.cal-type-icon{flex:none; color:var(--ink-3)}
+.cal-item-title{flex:1; min-width:0}
+.cal-day-empty{font-size:.85rem; color:var(--ink-2); font-style:italic}
+.cal-day-composer{display:flex; flex-direction:column; gap:.5rem; margin-top:.3rem}
+.cal-day-locked{font-size:.82rem; color:var(--ink-2); background:var(--surface-2); border:1px dashed var(--line-2); border-radius:5px; padding:.6rem .7rem; margin-top:.3rem}
+.cal-archive-date{font-family:var(--font-mono); font-size:.68rem; color:var(--ink-3); margin:1rem 0 .3rem}
+
+footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:.72rem; color:var(--ink-3)}
+
+/* ============ lock screen ============ */
+.lock-screen{position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:1.5rem}
+.lock-card{width:100%; max-width:320px; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:2rem 1.6rem; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; text-align:center; gap:.6rem}
+.lock-eyebrow{font-family:var(--font-mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin:0}
+.lock-title{font-size:1.3rem; margin:.2rem 0 1rem}
+.lock-input{width:100%; text-align:center; letter-spacing:.25em; font-family:var(--font-mono)}
+.lock-btn{width:100%; justify-content:center; margin-top:.6rem}
+.lock-error{color:var(--danger); font-family:var(--font-mono); font-size:.76rem; margin:.4rem 0 0}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13M10 11v6M14 11v6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+<symbol id="i-note" viewBox="0 0 24 24"><path d="M5 4h11l4 4v12H5zM16 4v4h4M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-tasks" viewBox="0 0 24 24"><path d="M4 6.5 5.8 8.3 9 5M4 14.5l1.8 1.8L9 13M12.5 7h7.5M12.5 15H20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-clip" viewBox="0 0 24 24"><path d="M20 11l-8.5 8.5a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.2-2.1l7.4-7.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="10" r="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m20 15.5-4.5-4.5-6.5 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5zM3 13l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="M15 4.5 8 12l7 7.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="M9 4.5 16 12l-7 7.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.5v2.6M12 18.9v2.6M4.6 12H2M22 12h-2.6M5.8 5.8 7.6 7.6M16.4 16.4l1.8 1.8M5.8 18.2l1.8-1.8M16.4 7.6l1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.2A8.3 8.3 0 1 1 9.8 3.2 6.7 6.7 0 0 0 20 14.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-therm" viewBox="0 0 24 24"><path d="M14 5a2 2 0 1 0-4 0v9.2a3.6 3.6 0 1 0 4 0zM12 11v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-plane" viewBox="0 0 24 24"><path d="M21 3 3.5 10.5l6 2.4 2.4 6zM9.5 12.9 21 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L20 8l-4-4L4 16zM14.5 5.5 18.5 9.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5c0-1 .8-1.5 2-1.5h6v15H6c-1.2 0-2 .3-2 1.3zM20 5.5c0-1-.8-1.5-2-1.5h-6v15h6c1.2 0 2 .3 2 1.3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4 10h16M8 3v4M16 3v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</defs></svg>
+
+<div class="lock-screen" id="lock-screen">
+  <form class="lock-card" id="lock-form">
+    <p class="lock-eyebrow">Отель — библия проекта</p>
+    <h1 class="lock-title">Приватная страница</h1>
+    <input type="password" id="lock-input" class="lock-input" placeholder="Пароль" autocomplete="off" inputmode="numeric">
+    <button type="submit" class="btn lock-btn"><svg><use href="#i-check"></use></svg>Войти</button>
+    <p class="lock-error" id="lock-error" hidden>Неверный пароль</p>
+  </form>
+</div>
+
+<div class="shell" id="app-shell" hidden>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="brand-lamp" aria-hidden="true"></span>
+        <span class="brand-name">Отель</span>
+      </div>
+      <div class="brand-meta">
+        <span>Жанр <b>психологический хоррор</b></span>
+        <span>Движок <b>Godot</b></span>
+        <span>Статус <b>в разработке</b></span>
+        <span>Автор <b>Nestt</b></span>
+      </div>
+    </div>
+    <nav class="nav-group">
+      <p class="nav-label">Библия проекта</p>
+      <ul class="nav-list" role="tablist">
+        <li><button type="button" class="nav-btn active" data-tab="story" role="tab" aria-selected="true"><svg><use href="#i-book"></use></svg>Сюжет</button></li>
+        <li><button type="button" class="nav-btn" data-tab="tech" role="tab" aria-selected="false"><svg><use href="#i-tasks"></use></svg>Технический</button></li>
+        <li><button type="button" class="nav-btn" data-tab="ideas" role="tab" aria-selected="false"><svg><use href="#i-note"></use></svg>Идеи</button></li>
+        <li><button type="button" class="nav-btn" data-tab="extra" role="tab" aria-selected="false"><svg><use href="#i-clip"></use></svg>Доп. информация</button></li>
+        <li><button type="button" class="nav-btn" data-tab="calendar" role="tab" aria-selected="false"><svg><use href="#i-calendar"></use></svg>Календарь</button></li>
+      </ul>
+    </nav>
+    <div class="sidebar-foot">
+      <button type="button" class="theme-btn" id="theme-toggle" aria-label="Переключить тему">
+        <svg id="theme-icon" width="14" height="14"><use href="#i-moon"></use></svg>
+        <span id="theme-label">Тёмная</span>
+      </button>
+      <p class="save-status" id="save-status"></p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="main-inner">
+
+      <!-- ===================== STORY ===================== -->
+      <div class="tab-panel" data-tab="story">
+        <h1 class="view-title">Сюжетная библия</h1>
+        <p class="view-sub">Живой документ · дополняется по ходу разработки</p>
+
+        <nav class="story-toc">
+          <p class="story-toc-label">Содержание</p>
+          <ol>
+            <li><a href="#world">1. Мир</a></li>
+            <li><a href="#hero">2. Главный герой</a></li>
+            <li><a href="#incident">3. Что произошло</a></li>
+            <li><a href="#mechanics">4. Хоррор изнутри</a></li>
+            <li><a href="#ending">5. Финал</a></li>
+            <li><a href="#phone">6. Телефон Эрика</a></li>
+            <li><a href="#computer">7. Компьютер на ресепшене</a></li>
+            <li><a href="#questions">8. Открытые вопросы</a></li>
+            <li><a href="#dialogue">9. Пример диалога</a></li>
+            <li><a href="#opening">10. Первые минуты</a></li>
+          </ol>
+        </nav>
+
+        <div class="story">
+
+<section id="world">
+<div class="section-tag">01</div>
+<h2>Мир</h2>
+<p>Отель — реальное физическое место, три этажа: номера, кухня, лобби, туалет, склад, ресторан. Он существует именно таким, каким его видели бы другие люди. Всё, что искажается, — не свойство здания, а свойство сознания главного героя: монстров, звуков и сдвигов в планировке кроме него никто не видит и не слышит.</p>
+</section>
+
+<section id="hero">
+<div class="section-tag">02</div>
+<h2>Главный герой — Эрик</h2>
+<p>Эрику 21 год, работает в отеле администратором на ресепшене (роль охранника — под вопросом, см. «Открытые вопросы»). Ключевую ночь своей жизни он не помнит целиком — психика стёрла её, — но отдельные куски прорываются флэшбэками, которые запускаются конкретными местами отеля: лестница, склад, определённый номер.</p>
+<p>Действие игры происходит спустя 3 года после трагедии — на момент смерти друга Эрику было 18.</p>
+</section>
+
+<section id="incident">
+<div class="section-tag">03</div>
+<h2>Что произошло</h2>
+<p>В центре истории — гибель близкого друга Эрика, Райана. Они поссорились из-за мелочи, и Эрик, не сумев переступить через собственную гордость, ушёл из его номера вместо того, чтобы остаться и помириться. Пока его не было, в номере начался пожар.</p>
+<p>Эрик вернулся, но было слишком поздно. Погиб только один человек — Райан. Эрик до сих пор жалеет не о самой ссоре, а о том, что она была настолько мелкой — он вполне мог остаться.</p>
+<div class="open-block">
+<span class="badge open">В разработке</span>
+<p>Рабочая версия: кто-то посторонний закрыл дверь номера уже после того, как Эрик ушёл — это осложнило или сделало невозможным спасение Райана. Роль и мотив этого человека пока не определены — см. «Открытые вопросы».</p>
+</div>
+</section>
+
+<section id="mechanics">
+<div class="section-tag">04</div>
+<h2>Хоррор изнутри</h2>
+<p>По ходу игры всплывают «воспоминания» от лица друга. На деле это не сцены, которые видел сам ГГ, — это истории, которые друг когда-то ему рассказывал, а память ГГ пересобрала их в подобие чужого взгляда.</p>
+<p>Отдельно от них — периодические галлюцинации: силуэт друга, мелькающий в дверных проёмах и коридорах. Оба приёма держатся на одном: ГГ не отпускает друга, а хранит его через его же голос и присутствие.</p>
+</section>
+
+<section id="ending">
+<div class="section-tag">05</div>
+<h2>Финал</h2>
+<p>Кульминация происходит в том самом номере. Накопленные фрагменты флэшбэков наконец складываются в цельное, прямое воспоминание о самой ночи — без «пересказанной» интонации, в отличие от остальных воспоминаний по игре.</p>
+<p>Осознав всё до конца, Эрик сознательно поджигает отель целиком и уходит навсегда — не в помрачении, а как решение. Это финал-освобождение: после пожара галлюцинации прекращаются, силуэт Райана больше не появляется.</p>
+<div class="open-block">
+<span class="badge open">В разработке</span>
+<p>В финале Эрик встречает в отеле того самого постороннего человека и мстит ему — формулировка «тем самым спасает свою жизнь» подразумевает, что эта месть ещё и защищает его самого. Как это стыкуется с виной самого Эрика (гордость), пока не решено.</p>
+</div>
+</section>
+
+<section id="phone">
+<div class="section-tag">06</div>
+<h2>Телефон Эрика</h2>
+<p>В игре у Эрика полностью интерактивный телефон: фонарик, сообщения, контакты, заметки, игра, банк. Сюжетно важны три — сообщения, контакты и заметки.</p>
+<p>В контактах и сообщениях — немного, но конкретная информация (в проработке, что именно). В заметках — записи, которые Эрик делал уже после смерти Райана, в черновом виде, до того как амнезия стёрла всё окончательно.</p>
+</section>
+
+<section id="computer">
+<div class="section-tag">07</div>
+<h2>Компьютер на ресепшене</h2>
+<p>Рабочий стол в духе Windows 7. Открыто одно окно браузера, в котором сразу загружен сайт отеля — отдельного приложения нет, всё через сайт.</p>
+<p>На сайте несколько разделов, один из них — «Жалобы». Сначала виден список заголовков (только самое главное, коротко), а при клике на заголовок открывается подробное сообщение с полями «Имя», «Номер комнаты», «Текст жалобы» и «Время подачи». Ниже — рабочий пример именно этого поведения, можно кликнуть.</p>
+<div class="complaint-list">
+<details class="complaint">
+<summary><span class="c-title">Жалоба — Номер 214</span><span class="c-chevron">›</span></summary>
+<div class="c-body">
+<p><span class="c-label">Имя</span><span>Alexander</span></p>
+<p><span class="c-label">Номер комнаты</span><span>214</span></p>
+<p><span class="c-label">Сообщение</span><span>«Не работает свет, в номере темно с самого заселения.»</span></p>
+<p><span class="c-label">Время подачи</span><span>21:12</span></p>
+</div>
+</details>
+<details class="complaint">
+<summary><span class="c-title">Жалоба — Номер 108</span><span class="c-chevron">›</span></summary>
+<div class="c-body">
+<p><span class="c-label">Имя</span><span>James</span></p>
+<p><span class="c-label">Номер комнаты</span><span>108</span></p>
+<p><span class="c-label">Сообщение</span><span>«Слышен странный шум за стеной, мешает уснуть.»</span></p>
+<p><span class="c-label">Время подачи</span><span>22:47</span></p>
+</div>
+</details>
+</div>
+</section>
+
+<section id="questions">
+<div class="section-tag">08</div>
+<h2>Открытые вопросы</h2>
+<p class="lede">То, что ещё предстоит решить — следующие шаги по сюжету.</p>
+<ul class="questions">
+<li>
+<span class="q-tag">Посторонний</span>
+        Почему он закрыл дверь номера — специально, зная, что внутри кто-то есть, или случайно, не подозревая о последствиях?
+      </li>
+<li>
+<span class="q-tag">Финал / месть</span>
+        В развязке он реально угрожает жизни ГГ (месть заодно и самозащита), или ГГ сам приходит к нему без внешней угрозы?
+      </li>
+<li>
+<span class="q-tag">Баланс вины</span>
+        Гордость ГГ и поступок постороннего — это два отдельных источника вины, которые складываются, или после того как ГГ узнаёт про этого человека, вина смещается с себя на него?
+      </li>
+<li>
+<span class="q-tag">Геймплей</span>
+        Как искажения по конкретным помещениям (кухня, склад, ресторан, туалет, лобби) привязать к конкретным кускам травмы — пока не проработано.
+      </li>
+<li>
+<span class="q-tag">Завязка</span>
+        Начало игры ещё не придумано — следующий шаг после того, как финал устоится окончательно.
+      </li>
+<li>
+<span class="q-tag">Роль Эрика</span>
+        Оставлять ли за ним функцию охранника, или он просто администратор — тогда обходы по отелю нужно обосновать иначе (например, он единственный на ночной смене).
+      </li>
+<li>
+<span class="q-tag">Друзья Эрика</span>
+        Райан был единственным по-настоящему близким другом, или у Эрика есть другие друзья?
+      </li>
+</ul>
+</section>
+
+<section id="dialogue">
+<div class="section-tag">09</div>
+<h2>Пример диалога — заселение гостя</h2>
+<p class="lede">Черновой пример рутинного диалога на ресепшене, для ощущения обычной смены Эрика.</p>
+<div class="dialogue">
+<p class="admin"><span class="who">Администратор</span><span class="line">Добрый вечер, у вас забронирован номер?</span></p>
+<p class="guest"><span class="who">Гость</span><span class="line">Да, на имя Alexander.</span></p>
+<p class="admin"><span class="who">Администратор</span><span class="line">Секунду, нашёл. Один номер на двое суток, верно? Можно ваш документ?</span></p>
+<p class="guest"><span class="who">Гость</span><span class="line">Вот, пожалуйста.</span></p>
+<p class="admin"><span class="who">Администратор</span><span class="line">Спасибо. Заполните, пожалуйста, вот здесь — и оставьте карту для депозита, если не возражаете.</span></p>
+<p class="guest"><span class="who">Гость</span><span class="line">Без проблем.</span></p>
+<p class="admin"><span class="who">Администратор</span><span class="line">Отлично, вы в 214-м, третий этаж, лифт слева от стойки. Завтрак с 8 до 10 в ресторане на первом этаже, выселение до полудня. Вот ваш ключ.</span></p>
+<p class="guest"><span class="who">Гость</span><span class="line">Спасибо.</span></p>
+<p class="admin"><span class="who">Администратор</span><span class="line">Приятного отдыха.</span></p>
+</div>
+</section>
+
+<section id="opening">
+<div class="section-tag">10</div>
+<h2>Первые минуты</h2>
+<p class="lede">Уточнённая раскадровка вступительной смены — конкретные действия игрока по шагам.</p>
+<p class="lede">Клик на шаг разворачивает подробности.</p>
+<div class="steps">
+<details class="step">
+<summary><span class="step-num">1</span><span class="step-title">Начало смены</span><span class="step-time">~30 сек</span><span class="c-chevron">›</span></summary>
+<div class="step-body">
+<p>Игрок получает управление прямо за стойкой ресепшена. На мониторе — рабочий стол в духе Windows 7, никакого экрана входа, значков по бокам почти нет: одно окно браузера уже открыто на главной странице сайта отеля.</p>
+<p>Никакого туториала с подсказками не показывается — игрок сам кликает по интерфейсу, как по обычному сайту. Задача шага — просто дать освоиться с управлением мышью/курсором в диегетическом UI, прежде чем начнётся что-то важное.</p>
+</div>
+</details>
+<details class="step">
+<summary><span class="step-num">2</span><span class="step-title">Жалоба на сайте</span><span class="step-time">~30 сек</span><span class="c-chevron">›</span></summary>
+<div class="step-body">
+<p>В навигации сайта — раздел «Жалобы». Внутри список из нескольких коротких заголовков (только суть, без подробностей), среди них — «Жалоба — Номер 214».</p>
+<p>Клик по заголовку разворачивает карточку: Имя — Alexander, Номер комнаты — 214, Сообщение — «Не работает свет, в номере темно с самого заселения», Время подачи — 21:12. Это единственная жалоба, которую игрок обязан открыть, чтобы продолжить.</p>
+</div>
+</details>
+<details class="step">
+<summary><span class="step-num">3</span><span class="step-title">Склад</span><span class="step-time">~1–2 мин</span><span class="c-chevron">›</span></summary>
+<div class="step-body">
+<p>Эрик выходит из-за стойки и идёт на склад — игрок впервые видит эту локацию и успевает осмотреться (полки, коробки, инвентарь отеля).</p>
+<p>У полки подсвечивается взаимодействие: нажатие F подбирает лампочку. Второе нажатие F у соседней полки подбирает инструмент (отвёртку). Никакого отдельного окна инвентаря нет — предметы просто становятся доступны для использования на месте, где они нужны.</p>
+</div>
+</details>
+<details class="step">
+<summary><span class="step-num">4</span><span class="step-title">Номер 214</span><span class="step-time">~1–2 мин</span><span class="c-chevron">›</span></summary>
+<div class="step-body">
+<p>Эрик заходит в номер 214. У окна или рядом со светильником стоит стул. Нажатие F берёт стул, второе действие — ставит его точно под лампой.</p>
+<p>Игрок нажимает F ещё раз, стоя на/у стула — короткая анимация без мини-игры, лампочка вкручена и загорается. После этого F ещё раз — Эрик берёт стул и возвращает его на исходное место в комнате, чтобы не оставлять следов беспорядка, и выходит.</p>
+</div>
+</details>
+<details class="step">
+<summary><span class="step-num">5</span><span class="step-title">Возврат на ресепшен</span><span class="step-time">~1 мин</span><span class="c-chevron">›</span></summary>
+<div class="step-body">
+<p>Эрик идёт напрямую обратно к стойке — коридором, без захода на кухню, в ресторан или на другие этажи. Полноценный обход по протоколу на этом этапе игры ещё не вводится.</p>
+<p>Как только Эрик садится за стойку, шаг считается завершён — это естественная точка, где либо начинается следующий кусок вступления, либо (в будущей версии) идёт переход к шагу 6.</p>
+</div>
+</details>
+<details class="step open">
+<summary><span class="step-num">6</span><span class="step-title">Деталь не на месте</span><span class="step-time">?</span><span class="c-chevron">›</span></summary>
+<div class="step-body"><p>Замечает первую деталь не на месте — что именно, пока не определено. Открытый пункт: нужно решить, что это за деталь, где именно она находится и насколько заметно она подана игроку.</p></div>
+</details>
+</div>
+<p>По пути гость с мелким вопросом — от этой сцены решили отказаться, чтобы не усложнять последовательность. Всё это время на фоне идёт внутренний монолог Эрика — пока дефолтные мысли о работе, подробности позже.</p>
+<p class="total-time">Итого: <b>~4–6 минут</b> чистого геймплея (без учёта последнего пункта).</p>
+</section>
+
+        </div>
+      </div>
+
+      <!-- ===================== TECH ===================== -->
+      <div class="tab-panel" data-tab="tech" hidden>
+        <h1 class="view-title">Технический</h1>
+        <p class="view-sub">Заметки, задачи и материалы по реализации</p>
+
+        <div class="subtabs" role="tablist">
+          <button type="button" class="subtab-btn active" data-subtab="notes" role="tab" aria-selected="true"><svg><use href="#i-note"></use></svg>Заметки</button>
+          <button type="button" class="subtab-btn" data-subtab="tasks" role="tab" aria-selected="false"><svg><use href="#i-tasks"></use></svg>Задачи</button>
+          <button type="button" class="subtab-btn" data-subtab="files" role="tab" aria-selected="false"><svg><use href="#i-clip"></use></svg>Файлы</button>
+          <button type="button" class="subtab-btn" data-subtab="refs" role="tab" aria-selected="false"><svg><use href="#i-image"></use></svg>Референсы</button>
+          <button type="button" class="subtab-btn" data-subtab="textures" role="tab" aria-selected="false"><svg><use href="#i-layers"></use></svg>Текстуры</button>
+        </div>
+
+        <div class="subtab-panel" data-subtab="notes">
+          <p class="lede">Заметки по реализации — механики, баги, технические решения.</p>
+          <div class="idea-composer">
+            <textarea id="tech-input" placeholder="Опиши идею…" rows="3"></textarea>
+            <button type="button" class="btn" data-target="tech"><svg><use href="#i-plus"></use></svg>Добавить</button>
+          </div>
+          <div class="idea-list" id="tech-list"></div>
+        </div>
+
+        <div class="subtab-panel" data-subtab="tasks" hidden>
+          <p class="lede">Задачи по разработке.</p>
+          <div class="task-composer">
+            <input type="text" id="task-title" placeholder="Название задачи">
+            <textarea id="task-desc" placeholder="Развёрнутое описание (необязательно)" rows="3"></textarea>
+            <div class="task-composer-row">
+              <div class="file-picker">
+                <input type="file" id="task-image" accept="image/*" class="visually-hidden">
+                <label for="task-image" class="file-picker-btn">Прикрепить картинку</label>
+                <span class="file-picker-name" id="task-image-name">Файл не выбран</span>
+                <button type="button" class="file-clear-btn" id="task-image-clear" hidden>Убрать</button>
+              </div>
+              <input type="date" id="task-due">
+            </div>
+            <div class="file-preview-wrap">
+              <img id="task-image-preview" class="file-preview" hidden alt="">
+              <button type="button" class="file-preview-clear" id="task-image-clear-x" hidden aria-label="Убрать картинку"><svg width="14" height="14"><use href="#i-x"></use></svg></button>
+            </div>
+            <button type="button" class="btn" id="task-add-btn"><svg><use href="#i-plus"></use></svg>Добавить задачу</button>
+          </div>
+          <div class="task-list" id="task-list"></div>
+
+          <details class="task-archive">
+            <summary><span class="c-title">Архив выполненных</span><span class="c-chevron">›</span></summary>
+            <div class="task-list" id="task-archive-list"></div>
+          </details>
+        </div>
+
+        <div class="subtab-panel" data-subtab="files" hidden>
+          <p class="lede">Любые файлы с описанием.</p>
+          <div class="file-composer">
+            <div class="file-picker">
+              <input type="file" id="file-input" class="visually-hidden">
+              <label for="file-input" class="file-picker-btn">Выбрать файл</label>
+              <span class="file-picker-name" id="file-input-name">Файл не выбран</span>
+              <button type="button" class="file-clear-btn" id="file-input-clear" hidden>Убрать</button>
+            </div>
+            <div class="file-preview-wrap">
+              <img id="file-input-preview" class="file-preview" hidden alt="">
+              <button type="button" class="file-preview-clear" id="file-input-clear-x" hidden aria-label="Убрать файл"><svg width="14" height="14"><use href="#i-x"></use></svg></button>
+            </div>
+            <textarea id="file-desc" placeholder="Описание файла…" rows="2"></textarea>
+            <button type="button" class="btn" id="file-add-btn"><svg><use href="#i-plus"></use></svg>Прикрепить</button>
+          </div>
+          <p class="hint">Файлы хранятся прямо на странице — держи их примерно до 25 МБ.</p>
+          <div class="file-list" id="file-list"></div>
+        </div>
+
+        <div class="subtab-panel" data-subtab="refs" hidden>
+          <p class="lede">Референсы — картинки с описанием, можно листать.</p>
+          <div class="file-composer">
+            <div class="file-picker">
+              <input type="file" id="ref-input" accept="image/*" class="visually-hidden">
+              <label for="ref-input" class="file-picker-btn">Выбрать картинку</label>
+              <span class="file-picker-name" id="ref-input-name">Файл не выбран</span>
+              <button type="button" class="file-clear-btn" id="ref-input-clear" hidden>Убрать</button>
+            </div>
+            <div class="file-preview-wrap">
+              <img id="ref-input-preview" class="file-preview" hidden alt="">
+              <button type="button" class="file-preview-clear" id="ref-input-clear-x" hidden aria-label="Убрать картинку"><svg width="14" height="14"><use href="#i-x"></use></svg></button>
+            </div>
+            <textarea id="ref-desc" placeholder="Описание…" rows="2"></textarea>
+            <button type="button" class="btn" id="ref-add-btn"><svg><use href="#i-plus"></use></svg>Добавить</button>
+          </div>
+          <div class="gallery" id="ref-gallery"></div>
+        </div>
+
+        <div class="subtab-panel" data-subtab="textures" hidden>
+          <p class="lede">Просто текстуры.</p>
+          <div class="file-composer">
+            <div class="file-picker">
+              <input type="file" id="texture-input" accept="image/*" class="visually-hidden">
+              <label for="texture-input" class="file-picker-btn">Выбрать картинку</label>
+              <span class="file-picker-name" id="texture-input-name">Файл не выбран</span>
+              <button type="button" class="file-clear-btn" id="texture-input-clear" hidden>Убрать</button>
+            </div>
+            <div class="file-preview-wrap">
+              <img id="texture-input-preview" class="file-preview" hidden alt="">
+              <button type="button" class="file-preview-clear" id="texture-input-clear-x" hidden aria-label="Убрать картинку"><svg width="14" height="14"><use href="#i-x"></use></svg></button>
+            </div>
+            <button type="button" class="btn" id="texture-add-btn"><svg><use href="#i-plus"></use></svg>Добавить</button>
+          </div>
+          <div class="gallery" id="texture-gallery"></div>
+        </div>
+      </div>
+
+      <!-- ===================== IDEAS ===================== -->
+      <div class="tab-panel" data-tab="ideas" hidden>
+        <h1 class="view-title">Идеи</h1>
+        <p class="view-sub">Сюжетные и любые другие идеи на будущее — остаются на странице</p>
+        <div class="idea-composer">
+          <textarea id="ideas-input" placeholder="Опиши идею…" rows="3"></textarea>
+          <button type="button" class="btn" data-target="ideas"><svg><use href="#i-plus"></use></svg>Добавить</button>
+        </div>
+        <div class="idea-list" id="ideas-list"></div>
+      </div>
+
+      <!-- ===================== EXTRA ===================== -->
+      <div class="tab-panel" data-tab="extra" hidden>
+        <h1 class="view-title">Доп. информация</h1>
+        <p class="view-sub">Всё остальное, что не вписывается в другие разделы</p>
+        <div class="idea-composer">
+          <textarea id="extra-input" placeholder="Напиши что-нибудь…" rows="3"></textarea>
+          <button type="button" class="btn" data-target="extra"><svg><use href="#i-plus"></use></svg>Добавить</button>
+        </div>
+        <div class="idea-list" id="extra-list"></div>
+      </div>
+
+      <!-- ===================== CALENDAR ===================== -->
+      <div class="tab-panel" data-tab="calendar" hidden>
+        <h1 class="view-title">Календарь</h1>
+        <p class="view-sub">Нажми на число, чтобы назначить задачу, файл, референс или текстуру на этот день, или отметить выходной, больничный, отпуск</p>
+
+        <div class="cal-shell">
+          <div class="cal-grid-col">
+            <div class="cal-nav">
+              <button type="button" class="ico-btn" id="cal-prev" title="Предыдущий месяц" aria-label="Предыдущий месяц"><svg><use href="#i-left"></use></svg></button>
+              <p class="cal-month-label" id="cal-month-label"></p>
+              <button type="button" class="ico-btn" id="cal-next" title="Следующий месяц" aria-label="Следующий месяц"><svg><use href="#i-right"></use></svg></button>
+              <span class="cal-legend"><i class="cal-dot"></i>назначено</span>
+            </div>
+            <div class="cal-weekdays">
+              <span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span>
+            </div>
+            <div class="cal-cells" id="cal-cells"></div>
+
+            <details class="task-archive">
+              <summary><span class="c-title">Архив по дням</span><span class="c-chevron">›</span></summary>
+              <div class="task-list" id="cal-archive-list"></div>
+            </details>
+          </div>
+
+          <aside class="cal-day-panel" id="cal-day-panel"></aside>
+        </div>
+      </div>
+
+      <footer>Живой документ · Отель — библия проекта</footer>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function () {
+  var PASSWORD = '6755432';
+  var LOCK_KEY = 'hotel-unlocked';
+  var lockScreen = document.getElementById('lock-screen');
+  var shell = document.getElementById('app-shell');
+  var lockForm = document.getElementById('lock-form');
+  var lockInput = document.getElementById('lock-input');
+  var lockError = document.getElementById('lock-error');
+  var unlocked = false;
+  try { unlocked = localStorage.getItem(LOCK_KEY) === '1'; } catch (e) {}
+  if (unlocked) {
+    lockScreen.hidden = true;
+    shell.hidden = false;
+  } else {
+    lockInput.focus();
+  }
+  lockForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (lockInput.value === PASSWORD) {
+      try { localStorage.setItem(LOCK_KEY, '1'); } catch (e) {}
+      lockScreen.hidden = true;
+      shell.hidden = false;
+      lockError.hidden = true;
+    } else {
+      lockError.hidden = false;
+      lockInput.value = '';
+      lockInput.focus();
+    }
+  });
+})();
+
+(function () {
+  var MAX_BYTES = 25 * 1024 * 1024;
+  var state = {
+    tech: [], ideas: [], extra: [],
+    tasks: [], tasksArchive: [],
+    files: [], refs: [], textures: [],
+    calendar: [], calendarArchive: [], dayMarks: []
+  };
+  var STATE_KEYS = ['tech', 'ideas', 'extra', 'tasks', 'tasksArchive', 'files', 'refs', 'textures', 'calendar', 'calendarArchive', 'dayMarks'];
+  var CAL_TYPE_ICON = { task: '#i-tasks', file: '#i-clip', ref: '#i-image', texture: '#i-layers' };
+  var CAL_MARK_ICON = { dayoff: '#i-sun', sick: '#i-therm', vacation: '#i-plane' };
+  var CAL_MARK_SHORT = { dayoff: 'вых', sick: 'больн', vacation: 'отпуск' };
+  var CAL_MARK_FULL = { work: 'Рабочий', dayoff: 'Выходной', sick: 'Больничный', vacation: 'Отпуск' };
+  var MONTH_NAMES = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+  var WEEKDAY_NAMES = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+  function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+  function todayISO() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  var calView = (function () { var d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; })();
+  var calSelectedDate = todayISO();
+  var galleryIndex = { refs: 0, textures: 0 };
+
+  var lists = {
+    tech: document.getElementById('tech-list'),
+    ideas: document.getElementById('ideas-list'),
+    extra: document.getElementById('extra-list')
+  };
+  var inputs = {
+    tech: document.getElementById('tech-input'),
+    ideas: document.getElementById('ideas-input'),
+    extra: document.getElementById('extra-input')
+  };
+  var statusEl = document.getElementById('save-status');
+
+  // theme toggle (per-viewer preference — safe to keep in localStorage)
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    var icon = document.getElementById('theme-icon');
+    var label = document.getElementById('theme-label');
+    if (!btn || !icon) return;
+    var saved = null;
+    try { saved = localStorage.getItem('hotel-theme'); } catch (e) {}
+    function systemPrefersDark() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    function apply(theme) {
+      if (theme) root.setAttribute('data-theme', theme);
+      else root.removeAttribute('data-theme');
+      var isDark = theme ? theme === 'dark' : systemPrefersDark();
+      icon.innerHTML = '<use href="' + (isDark ? '#i-sun' : '#i-moon') + '"></use>';
+      var next = isDark ? 'Светлая' : 'Тёмная';
+      if (label) label.textContent = next;
+      btn.setAttribute('aria-label', 'Переключить на ' + (isDark ? 'светлую' : 'тёмную') + ' тему');
+    }
+    apply(saved);
+    btn.addEventListener('click', function () {
+      var current = root.getAttribute('data-theme') || (systemPrefersDark() ? 'dark' : 'light');
+      var next = current === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('hotel-theme', next); } catch (e) {}
+      apply(next);
+    });
+  })();
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  function nowStr() {
+    return new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' Б';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
+    return (bytes / 1024 / 1024).toFixed(2) + ' МБ';
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(r.result); };
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+
+  function wireFilePicker(inputId, nameId, previewId, clearIds, onReady) {
+    var input = document.getElementById(inputId);
+    var nameEl = document.getElementById(nameId);
+    var previewEl = document.getElementById(previewId);
+    var clearBtns = (clearIds || []).map(function (id) { return document.getElementById(id); }).filter(Boolean);
+    function setClearVisible(visible) {
+      clearBtns.forEach(function (b) { b.hidden = !visible; });
+    }
+    function clear() {
+      nameEl.textContent = 'Файл не выбран';
+      previewEl.hidden = true;
+      previewEl.src = '';
+      setClearVisible(false);
+    }
+    input.addEventListener('change', function () {
+      var file = input.files && input.files[0];
+      if (!file) { onReady(null); clear(); return; }
+      if (file.size > MAX_BYTES) {
+        setStatus('Файл слишком большой — держи примерно до 25 МБ.', true);
+        input.value = ''; onReady(null); clear();
+        return;
+      }
+      readFileAsDataUrl(file).then(function (dataUrl) {
+        onReady({ dataUrl: dataUrl, name: file.name, size: file.size, isImage: file.type.indexOf('image/') === 0 });
+        nameEl.textContent = file.name;
+        setClearVisible(true);
+        if (file.type.indexOf('image/') === 0) {
+          previewEl.src = dataUrl;
+          previewEl.hidden = false;
+        } else {
+          previewEl.hidden = true;
+          previewEl.src = '';
+        }
+      }).catch(function () { setStatus('Не получилось прочитать файл.', true); });
+    });
+    clearBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        input.value = '';
+        clear();
+        onReady(null);
+      });
+    });
+    return {
+      reset: function () { input.value = ''; clear(); }
+    };
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    var parts = dataUrl.split(',');
+    var meta = parts[0];
+    var isBase64 = meta.indexOf('base64') !== -1;
+    var mime = (meta.match(/:(.*?);/) || [, 'application/octet-stream'])[1];
+    var raw = isBase64 ? atob(parts[1]) : decodeURIComponent(parts[1]);
+    var arr = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+
+  function downloadItem(name, dataUrl) {
+    var url = URL.createObjectURL(dataUrlToBlob(dataUrl));
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    setStatus('Скачано');
+  }
+
+  function renderList(key) {
+    var el = lists[key];
+    var items = state[key] || [];
+    if (!items.length) {
+      el.innerHTML = '<p class="idea-empty">Пока пусто.</p>';
+      return;
+    }
+    el.innerHTML = items.map(function (it) {
+      return '<div class="idea-item" data-id="' + it.id + '">'
+        + '<svg class="idea-icon" width="16" height="16"><use href="#i-note"></use></svg>'
+        + '<div class="idea-text">' + escapeHtml(it.text) + '</div>'
+        + '<span class="idea-time">' + escapeHtml(it.time) + '</span>'
+        + '<button type="button" class="ico-btn ghost danger" data-action="delete-idea" title="Удалить" aria-label="Удалить"><svg><use href="#i-trash"></use></svg></button>'
+        + '</div>';
+    }).join('');
+  }
+
+  function ensureIds() {
+    ['tech', 'ideas', 'extra'].forEach(function (key) {
+      (state[key] || []).forEach(function (it) {
+        if (!it.id) it.id = uid();
+      });
+    });
+  }
+
+  function archiveOverdueTasks() {
+    var today = todayISO();
+    var moved = false;
+    state.tasks = state.tasks.filter(function (t) {
+      if (t.dueDate && t.dueDate < today) {
+        t.completedAt = nowStr();
+        t.archiveReason = 'overdue';
+        state.tasksArchive.unshift(t);
+        moved = true;
+        return false;
+      }
+      return true;
+    });
+    return moved;
+  }
+
+  function renderTasks() {
+    if (archiveOverdueTasks()) persist();
+    var el = document.getElementById('task-list');
+    var items = state.tasks;
+    if (!items.length) {
+      el.innerHTML = '<p class="idea-empty">Нет активных задач.</p>';
+    } else {
+      el.innerHTML = items.map(function (t) {
+        var more = t.description || t.image;
+        return '<div class="task-item" data-id="' + t.id + '">'
+          + '<div class="task-row">'
+          + '<button type="button" class="ico-btn ghost labeled ok" data-action="done" title="Отметить выполненной" aria-label="Отметить выполненной"><svg><use href="#i-circle"></use></svg><span>Готово</span></button>'
+          + '<div class="task-main">'
+          + '<div class="task-title">' + escapeHtml(t.title) + '</div>'
+          + '<div class="task-meta">'
+          + (t.dueDate ? '<span class="task-due"><svg width="12" height="12"><use href="#i-clock"></use></svg>' + escapeHtml(t.dueDate) + '</span>' : '')
+          + '<span>Добавлено ' + escapeHtml(t.createdAt) + '</span>'
+          + '</div></div>'
+          + '<button type="button" class="ico-btn ghost danger labeled" data-action="reject" title="Отменить задачу" aria-label="Отменить задачу"><svg><use href="#i-trash"></use></svg><span>Отменить</span></button>'
+          + '</div>'
+          + (more ? ('<details class="task-more"><summary><svg width="13" height="13"><use href="#i-right"></use></svg>Подробнее</summary><div class="task-more-body">'
+              + (t.description ? '<div class="task-desc">' + escapeHtml(t.description) + '</div>' : '')
+              + (t.image ? '<img class="task-image" src="' + t.image + '" alt="">' : '')
+              + '</div></details>') : '')
+          + '</div>';
+      }).join('');
+    }
+    var archiveEl = document.getElementById('task-archive-list');
+    var arch = state.tasksArchive;
+    if (!arch.length) {
+      archiveEl.innerHTML = '<p class="idea-empty">Архив пуст.</p>';
+    } else {
+      archiveEl.innerHTML = arch.map(function (t) {
+        var more = t.description || t.image;
+        var overdue = t.archiveReason === 'overdue';
+        return '<div class="task-item completed' + (overdue ? ' overdue' : '') + '" data-id="' + t.id + '">'
+          + '<div class="task-row">'
+          + '<span class="ico-btn ghost" style="color:' + (overdue ? 'var(--danger)' : 'var(--ok)') + ';border-color:transparent" aria-hidden="true"><svg><use href="' + (overdue ? '#i-clock' : '#i-check') + '"></use></svg></span>'
+          + '<div class="task-main">'
+          + '<div class="task-title">' + escapeHtml(t.title) + '</div>'
+          + '<div class="task-meta">'
+          + '<span>' + (overdue ? 'Просрочено' : 'Выполнено') + ' ' + escapeHtml(t.completedAt) + '</span>'
+          + (t.dueDate ? '<span>Срок ' + escapeHtml(t.dueDate) + '</span>' : '')
+          + '</div></div>'
+          + '<button type="button" class="ico-btn ghost danger labeled" data-action="delete" title="Удалить" aria-label="Удалить"><svg><use href="#i-trash"></use></svg><span>Удалить</span></button>'
+          + '</div>'
+          + (more ? ('<details class="task-more"><summary><svg width="13" height="13"><use href="#i-right"></use></svg>Подробнее</summary><div class="task-more-body">'
+              + (t.description ? '<div class="task-desc">' + escapeHtml(t.description) + '</div>' : '')
+              + (t.image ? '<img class="task-image" src="' + t.image + '" alt="">' : '')
+              + '</div></details>') : '')
+          + '</div>';
+      }).join('');
+    }
+  }
+
+  function renderFiles() {
+    var el = document.getElementById('file-list');
+    var items = state.files;
+    if (!items.length) {
+      el.innerHTML = '<p class="idea-empty">Пока пусто.</p>';
+      return;
+    }
+    el.innerHTML = items.map(function (it) {
+      var ext = (it.name.split('.').pop() || '?').slice(0, 4).toUpperCase();
+      return '<div class="file-item" data-id="' + it.id + '">'
+        + '<span class="file-ext">' + escapeHtml(ext) + '</span>'
+        + '<div class="file-main">'
+        + '<div class="file-name">' + escapeHtml(it.name) + '</div>'
+        + (it.description ? '<div class="file-desc">' + escapeHtml(it.description) + '</div>' : '')
+        + '<div class="file-meta">' + escapeHtml(it.addedAt) + ' · ' + formatSize(it.size) + '</div>'
+        + '</div>'
+        + '<div class="task-actions">'
+        + '<button type="button" class="ico-btn ghost" data-action="download-file" title="Скачать" aria-label="Скачать"><svg><use href="#i-download"></use></svg></button>'
+        + '<button type="button" class="ico-btn ghost danger" data-action="delete-file" title="Удалить" aria-label="Удалить"><svg><use href="#i-trash"></use></svg></button>'
+        + '</div></div>';
+    }).join('');
+  }
+
+  function renderGallery(key, showDesc) {
+    var el = document.getElementById(key === 'refs' ? 'ref-gallery' : 'texture-gallery');
+    var items = state[key];
+    if (!items.length) {
+      el.innerHTML = '<p class="gallery-empty">Пока пусто.</p>';
+      return;
+    }
+    if (galleryIndex[key] >= items.length) galleryIndex[key] = items.length - 1;
+    if (galleryIndex[key] < 0) galleryIndex[key] = 0;
+    var it = items[galleryIndex[key]];
+    var html = '<div class="gallery-plate"><img src="' + it.dataUrl + '" alt=""></div>';
+    if (showDesc && it.description) html += '<div class="gallery-desc">' + escapeHtml(it.description) + '</div>';
+    html += '<div class="gallery-nav">'
+      + '<button type="button" class="ico-btn" data-action="prev" title="Предыдущее" aria-label="Предыдущее"><svg><use href="#i-left"></use></svg></button>'
+      + '<span class="gallery-count">' + (galleryIndex[key] + 1) + ' / ' + items.length + '</span>'
+      + '<button type="button" class="ico-btn" data-action="next" title="Следующее" aria-label="Следующее"><svg><use href="#i-right"></use></svg></button>'
+      + '</div>'
+      + '<div class="gallery-del"><button type="button" class="del-btn" data-action="delete-gallery" title="Удалить" aria-label="Удалить"><svg width="15" height="15"><use href="#i-trash"></use></svg></button></div>';
+    el.innerHTML = html;
+    el.querySelector('[data-action="prev"]').addEventListener('click', function () {
+      galleryIndex[key] = (galleryIndex[key] - 1 + items.length) % items.length;
+      renderGallery(key, showDesc);
+    });
+    el.querySelector('[data-action="next"]').addEventListener('click', function () {
+      galleryIndex[key] = (galleryIndex[key] + 1) % items.length;
+      renderGallery(key, showDesc);
+    });
+    el.querySelector('[data-action="delete-gallery"]').addEventListener('click', function () {
+      state[key].splice(galleryIndex[key], 1);
+      renderGallery(key, showDesc);
+      persist();
+    });
+  }
+
+  function renderAll() {
+    Object.keys(lists).forEach(renderList);
+    renderTasks();
+    renderFiles();
+    renderGallery('refs', true);
+    renderGallery('textures', false);
+    renderCalendarMonth();
+    renderCalDayPanel();
+    renderCalArchive();
+  }
+
+  function formatCalDate(iso) {
+    var parts = (iso || '').split('-');
+    if (parts.length !== 3) return iso || '';
+    return parts[2] + '.' + parts[1] + '.' + parts[0];
+  }
+
+  function getDayMark(dateStr) {
+    var m = (state.dayMarks || []).find(function (x) { return x.date === dateStr; });
+    return m ? m.kind : null;
+  }
+  function setDayMark(dateStr, kind) {
+    state.dayMarks = (state.dayMarks || []).filter(function (x) { return x.date !== dateStr; });
+    if (kind) state.dayMarks.push({ id: uid(), date: dateStr, kind: kind, createdAt: nowStr() });
+  }
+
+  function renderCalendarMonth() {
+    var y = calView.year, m = calView.month;
+    var labelEl = document.getElementById('cal-month-label');
+    if (!labelEl) return;
+    labelEl.textContent = MONTH_NAMES[m] + ' ' + y;
+    var first = new Date(y, m, 1);
+    var startOffset = (first.getDay() + 6) % 7;
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var daysInPrevMonth = new Date(y, m, 0).getDate();
+    var cells = [];
+    for (var i = 0; i < startOffset; i++) {
+      var dnum = daysInPrevMonth - startOffset + 1 + i;
+      var pm = m - 1, py = y; if (pm < 0) { pm = 11; py = y - 1; }
+      cells.push({ y: py, m: pm, d: dnum, out: true });
+    }
+    for (var d = 1; d <= daysInMonth; d++) cells.push({ y: y, m: m, d: d, out: false });
+    while (cells.length % 7 !== 0) {
+      var last = cells[cells.length - 1];
+      var nd = last.d + 1, nm = last.m, ny = last.y;
+      var dim = new Date(ny, nm + 1, 0).getDate();
+      if (nd > dim) { nd = 1; nm = nm + 1; if (nm > 11) { nm = 0; ny++; } }
+      cells.push({ y: ny, m: nm, d: nd, out: true });
+    }
+    var today = todayISO();
+    document.getElementById('cal-cells').innerHTML = cells.map(function (c) {
+      var dateStr = c.y + '-' + pad2(c.m + 1) + '-' + pad2(c.d + 0);
+      var mark = getDayMark(dateStr);
+      var pending = (state.calendar || []).filter(function (x) { return x.date === dateStr && x.status === 'pending'; });
+      var cls = 'cal-cell';
+      if (c.out) cls += ' out';
+      if (dateStr === today) cls += ' today';
+      if (dateStr === calSelectedDate) cls += ' selected';
+      if (mark) cls += ' mark-' + mark;
+      var dots = pending.slice(0, 3).map(function () { return '<span class="cal-dot"></span>'; }).join('');
+      if (pending.length > 3) dots += '<span style="font-size:9px;color:var(--ink-3);margin-left:2px">+' + (pending.length - 3) + '</span>';
+      return '<button type="button" class="' + cls + '" data-date="' + dateStr + '">'
+        + '<span class="cal-num">' + c.d + '</span>'
+        + (mark ? '<span class="cal-mark">' + CAL_MARK_SHORT[mark] + '</span>' : '')
+        + (dots ? '<span class="cal-dots">' + dots + '</span>' : '')
+        + '</button>';
+    }).join('');
+  }
+
+  function populateCalDayItems() {
+    var kindEl = document.getElementById('cal-day-kind');
+    var sel = document.getElementById('cal-day-item');
+    if (!kindEl || !sel) return;
+    var kind = kindEl.value;
+    var opts = [];
+    if (kind === 'task') {
+      state.tasks.forEach(function (t) { opts.push({ value: t.id, text: t.title }); });
+      state.tasksArchive.forEach(function (t) { opts.push({ value: t.id, text: t.title + ' (архив)' }); });
+    } else if (kind === 'file') {
+      state.files.forEach(function (f) { opts.push({ value: f.id, text: f.name }); });
+    } else if (kind === 'ref') {
+      state.refs.forEach(function (r, i) { opts.push({ value: r.id, text: r.description || ('Референс #' + (i + 1)) }); });
+    } else if (kind === 'texture') {
+      state.textures.forEach(function (t, i) { opts.push({ value: t.id, text: 'Текстура #' + (i + 1) + ' (' + t.addedAt + ')' }); });
+    }
+    if (!opts.length) {
+      sel.innerHTML = '<option value="">Пока нет элементов</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— выбери элемент —</option>' + opts.map(function (o) {
+      return '<option value="' + o.value + '">' + escapeHtml(o.text) + '</option>';
+    }).join('');
+  }
+
+  function renderCalDayPanel() {
+    var panel = document.getElementById('cal-day-panel');
+    if (!panel) return;
+    var dateStr = calSelectedDate;
+    var parts = dateStr.split('-');
+    var dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    var weekday = WEEKDAY_NAMES[dObj.getDay()];
+    var mark = getDayMark(dateStr);
+    var items = (state.calendar || []).filter(function (x) { return x.date === dateStr; });
+
+    var marksHtml = ['work', 'dayoff', 'sick', 'vacation'].map(function (k) {
+      var active = k === 'work' ? !mark : k === mark;
+      var icon = k === 'work' ? '#i-pencil' : CAL_MARK_ICON[k];
+      return '<button type="button" class="cal-mark-btn' + (active ? ' active' : '') + '" data-mark="' + k + '"><svg width="14" height="14"><use href="' + icon + '"></use></svg>' + CAL_MARK_FULL[k] + '</button>';
+    }).join('');
+
+    var itemsHtml = items.length ? items.map(function (it) {
+      return '<div class="cal-day-item' + (it.status !== 'pending' ? ' done' : '') + '" data-id="' + it.id + '">'
+        + '<button type="button" class="ico-btn ghost" data-action="cal-toggle" title="Отметить выполненной" aria-label="Отметить выполненной"><svg width="15" height="15"><use href="' + (it.status === 'pending' ? '#i-circle' : '#i-check') + '"></use></svg></button>'
+        + '<svg class="cal-type-icon" width="14" height="14"><use href="' + (CAL_TYPE_ICON[it.refType] || '#i-note') + '"></use></svg>'
+        + '<span class="cal-item-title">' + escapeHtml(it.label) + '</span>'
+        + '<button type="button" class="ico-btn ghost danger" data-action="cal-remove" title="Удалить" aria-label="Удалить"><svg width="14" height="14"><use href="#i-trash"></use></svg></button>'
+        + '</div>';
+    }).join('') : '<div class="cal-day-empty">На этот день ничего не назначено</div>';
+
+    panel.innerHTML = '<p class="cal-day-weekday">' + escapeHtml(weekday) + '</p>'
+      + '<p class="cal-day-date">' + escapeHtml(formatCalDate(dateStr)) + '</p>'
+      + '<p class="cal-day-label">Отметка дня</p>'
+      + '<div class="cal-marks">' + marksHtml + '</div>'
+      + '<p class="cal-day-label">Назначено</p>'
+      + '<div class="cal-day-items">' + itemsHtml + '</div>'
+      + (mark
+        ? '<p class="cal-day-locked">День отмечен как «' + escapeHtml(CAL_MARK_FULL[mark]) + '» — назначать задачи, файлы и референсы на такой день нельзя. Снимите отметку, чтобы назначить что-то.</p>'
+        : ('<div class="cal-day-composer">'
+          + '<select class="sel" id="cal-day-kind"><option value="task">Задача</option><option value="file">Файл</option><option value="ref">Референс</option><option value="texture">Текстура</option></select>'
+          + '<select class="sel" id="cal-day-item"></select>'
+          + '<button type="button" class="btn" id="cal-day-add"><svg width="15" height="15"><use href="#i-plus"></use></svg>Назначить</button>'
+          + '</div>'));
+
+    if (!mark) populateCalDayItems();
+
+    panel.querySelectorAll('.cal-mark-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setDayMark(dateStr, btn.dataset.mark === 'work' ? null : btn.dataset.mark);
+        renderCalDayPanel();
+        renderCalendarMonth();
+        persist();
+      });
+    });
+    panel.querySelectorAll('[data-action="cal-toggle"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('.cal-day-item').dataset.id;
+        var idx = state.calendar.findIndex(function (c) { return c.id === id; });
+        if (idx === -1) return;
+        var c = state.calendar.splice(idx, 1)[0];
+        c.status = 'done';
+        c.completedAt = nowStr();
+        state.calendarArchive.unshift(c);
+        renderCalDayPanel();
+        renderCalendarMonth();
+        renderCalArchive();
+        persist();
+      });
+    });
+    panel.querySelectorAll('[data-action="cal-remove"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('.cal-day-item').dataset.id;
+        state.calendar = state.calendar.filter(function (c) { return c.id !== id; });
+        renderCalDayPanel();
+        renderCalendarMonth();
+        persist();
+      });
+    });
+    var dayKindEl = document.getElementById('cal-day-kind');
+    if (dayKindEl) dayKindEl.addEventListener('change', populateCalDayItems);
+    var dayAddBtn = document.getElementById('cal-day-add');
+    if (dayAddBtn) dayAddBtn.addEventListener('click', function () {
+      var kindEl = document.getElementById('cal-day-kind');
+      var itemEl = document.getElementById('cal-day-item');
+      var itemId = itemEl.value;
+      if (!itemId) { setStatus('Выбери элемент для этого дня.', true); return; }
+      var label = itemEl.options[itemEl.selectedIndex].textContent;
+      state.calendar.push({ id: uid(), date: dateStr, refType: kindEl.value, refId: itemId, label: label, status: 'pending', createdAt: nowStr() });
+      renderCalDayPanel();
+      renderCalendarMonth();
+      persist();
+    });
+  }
+
+  function renderCalArchive() {
+    var el = document.getElementById('cal-archive-list');
+    if (!el) return;
+    var arch = (state.calendarArchive || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
+    if (!arch.length) {
+      el.innerHTML = '<p class="idea-empty">Архив пуст.</p>';
+      return;
+    }
+    var html = '';
+    var lastDate = null;
+    arch.forEach(function (c) {
+      if (c.date !== lastDate) {
+        html += '<p class="cal-archive-date">' + escapeHtml(formatCalDate(c.date)) + '</p>';
+        lastDate = c.date;
+      }
+      html += '<div class="cal-day-item done" data-id="' + c.id + '">'
+        + '<svg class="cal-type-icon" width="14" height="14"><use href="' + (CAL_TYPE_ICON[c.refType] || '#i-note') + '"></use></svg>'
+        + '<span class="cal-item-title">' + escapeHtml(c.label) + '</span>'
+        + '<button type="button" class="ico-btn ghost danger" data-action="delete-archive" title="Удалить" aria-label="Удалить"><svg width="14" height="14"><use href="#i-trash"></use></svg></button>'
+        + '</div>';
+    });
+    el.innerHTML = html;
+  }
+
+  function setStatus(msg, isError) {
+    if (!statusEl) return;
+    statusEl.textContent = msg || '';
+    statusEl.classList.toggle('error', !!isError);
+  }
+
+  var DB_NAME = 'hotel-bible';
+  var DB_STORE = 'state';
+  var DB_KEY = 'main';
+  function openDb() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore(DB_STORE); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+  function dbGet() {
+    return openDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(DB_STORE, 'readonly');
+        var req = tx.objectStore(DB_STORE).get(DB_KEY);
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { reject(req.error); };
+      });
+    });
+  }
+  function dbSet(value) {
+    return openDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(value, DB_KEY);
+        tx.oncomplete = function () { resolve(); };
+        tx.onerror = function () { reject(tx.error); };
+      });
+    });
+  }
+
+  var saving = false;
+  function persist() {
+    if (saving) return;
+    saving = true;
+    setStatus('Сохраняю…');
+    dbSet(state).then(function () {
+      setStatus('Сохранено');
+      saving = false;
+    }).catch(function (err) {
+      setStatus('Не получилось сохранить: ' + (err && err.message ? err.message : 'ошибка хранилища'), true);
+      saving = false;
+    });
+  }
+
+  function addIdea(key) {
+    var input = inputs[key];
+    if (!input) return;
+    var text = input.value.trim();
+    if (!text) return;
+    state[key].push({ id: uid(), text: text, time: nowStr() });
+    input.value = '';
+    renderList(key);
+    persist();
+  }
+
+  document.querySelectorAll('.btn[data-target]').forEach(function (btn) {
+    btn.addEventListener('click', function () { addIdea(btn.dataset.target); });
+  });
+  Object.keys(inputs).forEach(function (key) {
+    var el = inputs[key];
+    if (!el) return;
+    el.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addIdea(key); }
+    });
+  });
+  Object.keys(lists).forEach(function (key) {
+    var el = lists[key];
+    if (!el) return;
+    el.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-action="delete-idea"]');
+      if (!btn) return;
+      var item = btn.closest('.idea-item');
+      var id = item.dataset.id;
+      state[key] = state[key].filter(function (it) { return it.id !== id; });
+      renderList(key);
+      persist();
+    });
+  });
+
+  var tabBtns = document.querySelectorAll('.nav-btn[data-tab]');
+  var panels = document.querySelectorAll('.tab-panel');
+  tabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tabBtns.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      panels.forEach(function (p) { p.hidden = (p.dataset.tab !== btn.dataset.tab); });
+      if (btn.dataset.tab === 'calendar') { renderCalendarMonth(); renderCalDayPanel(); }
+      window.scrollTo(0, 0);
+    });
+  });
+
+  var subtabBtns = document.querySelectorAll('.subtab-btn');
+  var subpanels = document.querySelectorAll('.subtab-panel');
+  subtabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      subtabBtns.forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      subpanels.forEach(function (p) { p.hidden = (p.dataset.subtab !== btn.dataset.subtab); });
+    });
+  });
+
+  // tasks
+  var pendingTaskImg = null;
+  var taskPicker = wireFilePicker('task-image', 'task-image-name', 'task-image-preview', ['task-image-clear', 'task-image-clear-x'], function (res) {
+    pendingTaskImg = res ? res.dataUrl : null;
+  });
+  document.getElementById('task-add-btn').addEventListener('click', function () {
+    var titleEl = document.getElementById('task-title');
+    var descEl = document.getElementById('task-desc');
+    var dueEl = document.getElementById('task-due');
+    var title = titleEl.value.trim();
+    if (!title) return;
+    state.tasks.push({
+      id: uid(), title: title, description: descEl.value.trim(),
+      dueDate: dueEl.value, image: pendingTaskImg, createdAt: nowStr()
+    });
+    titleEl.value = ''; descEl.value = ''; dueEl.value = '';
+    pendingTaskImg = null;
+    taskPicker.reset();
+    renderTasks();
+    persist();
+  });
+  document.getElementById('task-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var item = btn.closest('.task-item');
+    var id = item.dataset.id;
+    var idx = state.tasks.findIndex(function (t) { return t.id === id; });
+    if (idx === -1) return;
+    if (btn.dataset.action === 'done') {
+      var t = state.tasks.splice(idx, 1)[0];
+      t.completedAt = nowStr();
+      state.tasksArchive.unshift(t);
+    } else if (btn.dataset.action === 'reject') {
+      state.tasks.splice(idx, 1);
+    }
+    renderTasks();
+    persist();
+  });
+  document.getElementById('task-archive-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-action="delete"]');
+    if (!btn) return;
+    var item = btn.closest('.task-item');
+    var id = item.dataset.id;
+    state.tasksArchive = state.tasksArchive.filter(function (t) { return t.id !== id; });
+    renderTasks();
+    persist();
+  });
+
+  // files
+  var pendingFile = null;
+  var filePicker = wireFilePicker('file-input', 'file-input-name', 'file-input-preview', ['file-input-clear', 'file-input-clear-x'], function (res) {
+    pendingFile = res;
+  });
+  document.getElementById('file-add-btn').addEventListener('click', function () {
+    var descEl = document.getElementById('file-desc');
+    if (!pendingFile) return;
+    state.files.push({
+      id: uid(), name: pendingFile.name, description: descEl.value.trim(),
+      dataUrl: pendingFile.dataUrl, size: pendingFile.size, addedAt: nowStr()
+    });
+    descEl.value = '';
+    pendingFile = null;
+    filePicker.reset();
+    renderFiles();
+    persist();
+  });
+  document.getElementById('file-list').addEventListener('click', function (e) {
+    var delBtn = e.target.closest('button[data-action="delete-file"]');
+    var dlBtn = e.target.closest('button[data-action="download-file"]');
+    if (dlBtn) {
+      var dlItem = dlBtn.closest('.file-item');
+      var dlId = dlItem.dataset.id;
+      var found = state.files.find(function (f) { return f.id === dlId; });
+      if (found) downloadItem(found.name, found.dataUrl);
+      return;
+    }
+    if (!delBtn) return;
+    var item = delBtn.closest('.file-item');
+    var id = item.dataset.id;
+    state.files = state.files.filter(function (f) { return f.id !== id; });
+    renderFiles();
+    persist();
+  });
+
+  // refs (images with description)
+  var pendingRef = null;
+  var refPicker = wireFilePicker('ref-input', 'ref-input-name', 'ref-input-preview', ['ref-input-clear', 'ref-input-clear-x'], function (res) {
+    pendingRef = res ? res.dataUrl : null;
+  });
+  document.getElementById('ref-add-btn').addEventListener('click', function () {
+    var descEl = document.getElementById('ref-desc');
+    if (!pendingRef) return;
+    state.refs.push({ id: uid(), description: descEl.value.trim(), dataUrl: pendingRef, addedAt: nowStr() });
+    descEl.value = '';
+    pendingRef = null;
+    refPicker.reset();
+    galleryIndex.refs = state.refs.length - 1;
+    renderGallery('refs', true);
+    persist();
+  });
+
+  // textures (images only)
+  var pendingTexture = null;
+  var texturePicker = wireFilePicker('texture-input', 'texture-input-name', 'texture-input-preview', ['texture-input-clear', 'texture-input-clear-x'], function (res) {
+    pendingTexture = res ? res.dataUrl : null;
+  });
+  document.getElementById('texture-add-btn').addEventListener('click', function () {
+    if (!pendingTexture) return;
+    state.textures.push({ id: uid(), dataUrl: pendingTexture, addedAt: nowStr() });
+    pendingTexture = null;
+    texturePicker.reset();
+    galleryIndex.textures = state.textures.length - 1;
+    renderGallery('textures', false);
+    persist();
+  });
+
+  // calendar
+  document.getElementById('cal-prev').addEventListener('click', function () {
+    calView.month--;
+    if (calView.month < 0) { calView.month = 11; calView.year--; }
+    renderCalendarMonth();
+  });
+  document.getElementById('cal-next').addEventListener('click', function () {
+    calView.month++;
+    if (calView.month > 11) { calView.month = 0; calView.year++; }
+    renderCalendarMonth();
+  });
+  document.getElementById('cal-cells').addEventListener('click', function (e) {
+    var btn = e.target.closest('.cal-cell');
+    if (!btn) return;
+    calSelectedDate = btn.dataset.date;
+    renderCalendarMonth();
+    renderCalDayPanel();
+  });
+  document.getElementById('cal-archive-list').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-action="delete-archive"]');
+    if (!btn) return;
+    var item = btn.closest('.cal-day-item');
+    var id = item.dataset.id;
+    state.calendarArchive = state.calendarArchive.filter(function (c) { return c.id !== id; });
+    renderCalArchive();
+    persist();
+  });
+
+  renderAll();
+  dbGet().then(function (data) {
+    if (data && typeof data === 'object') {
+      STATE_KEYS.forEach(function (k) {
+        if (Array.isArray(data[k])) state[k] = data[k];
+      });
+      ensureIds();
+      renderAll();
+    }
+  }).catch(function () {});
+})();
+</script>
+</body>
+</html>
