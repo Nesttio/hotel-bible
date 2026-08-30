@@ -886,10 +886,12 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
 
         <div class="cal-subtab-panel" data-cal-subtab="today" hidden>
           <div class="today-shell">
-            <aside class="cal-day-panel" id="today-day-panel"></aside>
+            <aside class="cal-day-panel" id="today-info-panel"></aside>
             <div>
               <p class="cal-day-label">Задачи со сроком сегодня</p>
               <div class="task-list" id="today-tasks-list"></div>
+              <p class="cal-day-label" style="margin-top:1.4rem">Файлы, референсы и текстуры за сегодня</p>
+              <div class="file-list" id="today-media-list"></div>
             </div>
           </div>
         </div>
@@ -1241,6 +1243,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     var items = state.files;
     if (!items.length) {
       el.innerHTML = '<p class="idea-empty">Пока пусто.</p>';
+      renderTodayMedia();
       return;
     }
     el.innerHTML = items.map(function (it) {
@@ -1257,6 +1260,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
         + '<button type="button" class="ico-btn ghost danger" data-action="delete-file" title="Удалить" aria-label="Удалить"><svg><use href="#i-trash"></use></svg></button>'
         + '</div></div>';
     }).join('');
+    renderTodayMedia();
   }
 
   function renderGallery(key, showDesc) {
@@ -1264,6 +1268,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     var items = state[key];
     if (!items.length) {
       el.innerHTML = '<p class="gallery-empty">Пока пусто.</p>';
+      renderTodayMedia();
       return;
     }
     if (galleryIndex[key] >= items.length) galleryIndex[key] = items.length - 1;
@@ -1291,6 +1296,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       renderGallery(key, showDesc);
       persist();
     });
+    renderTodayMedia();
   }
 
   function renderAll() {
@@ -1302,7 +1308,8 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     renderCalendarMonth();
     renderCalDayPanel();
     renderCalArchive();
-    renderTodayPanel();
+    renderTodayInfo();
+    renderTodayMedia();
   }
 
   function formatCalDate(iso) {
@@ -1388,6 +1395,28 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     }).join('');
   }
 
+  function completeCalendarItem(id, onChange) {
+    var idx = state.calendar.findIndex(function (c) { return c.id === id; });
+    if (idx === -1) return;
+    var c = state.calendar.splice(idx, 1)[0];
+    c.status = 'done';
+    c.completedAt = nowStr();
+    state.calendarArchive.unshift(c);
+    if (c.refType === 'task') {
+      var tIdx = state.tasks.findIndex(function (t) { return t.id === c.refId; });
+      if (tIdx !== -1) {
+        var t = state.tasks.splice(tIdx, 1)[0];
+        t.completedAt = nowStr();
+        state.tasksArchive.unshift(t);
+      }
+    }
+    renderTasks();
+    onChange();
+    renderCalendarMonth();
+    renderCalArchive();
+    persist();
+  }
+
   function renderDayPanel(panelId, prefix, dateStr, onChange) {
     var panel = document.getElementById(panelId);
     if (!panel) return;
@@ -1405,7 +1434,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
 
     var itemsHtml = items.length ? items.map(function (it) {
       return '<div class="cal-day-item' + (it.status !== 'pending' ? ' done' : '') + '" data-id="' + it.id + '">'
-        + '<button type="button" class="ico-btn ghost" data-action="cal-toggle" title="Отметить выполненной" aria-label="Отметить выполненной"><svg width="15" height="15"><use href="' + (it.status === 'pending' ? '#i-circle' : '#i-check') + '"></use></svg></button>'
+        + '<button type="button" class="ico-btn ghost" data-action="cal-toggle" title="Отметить выполненной" aria-label="Отметить выполненной"><svg width="15" height="15"><use href="#i-check"></use></svg></button>'
         + '<svg class="cal-type-icon" width="14" height="14"><use href="' + (CAL_TYPE_ICON[it.refType] || '#i-note') + '"></use></svg>'
         + '<span class="cal-item-title">' + escapeHtml(it.label) + '</span>'
         + '<button type="button" class="ico-btn ghost danger" data-action="cal-remove" title="Удалить" aria-label="Удалить"><svg width="14" height="14"><use href="#i-trash"></use></svg></button>'
@@ -1439,16 +1468,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     panel.querySelectorAll('[data-action="cal-toggle"]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var id = btn.closest('.cal-day-item').dataset.id;
-        var idx = state.calendar.findIndex(function (c) { return c.id === id; });
-        if (idx === -1) return;
-        var c = state.calendar.splice(idx, 1)[0];
-        c.status = 'done';
-        c.completedAt = nowStr();
-        state.calendarArchive.unshift(c);
-        onChange();
-        renderCalendarMonth();
-        renderCalArchive();
-        persist();
+        completeCalendarItem(id, onChange);
       });
     });
     panel.querySelectorAll('[data-action="cal-remove"]').forEach(function (btn) {
@@ -1479,8 +1499,76 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
   function renderCalDayPanel() {
     renderDayPanel('cal-day-panel', 'cal-day', calSelectedDate, renderCalDayPanel);
   }
-  function renderTodayPanel() {
-    renderDayPanel('today-day-panel', 'today-day', todayISO(), renderTodayPanel);
+
+  function renderTodayInfo() {
+    var panel = document.getElementById('today-info-panel');
+    if (!panel) return;
+    var dateStr = todayISO();
+    var parts = dateStr.split('-');
+    var dObj = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    var weekday = WEEKDAY_NAMES[dObj.getDay()];
+    var mark = getDayMark(dateStr);
+    var items = (state.calendar || []).filter(function (x) { return x.date === dateStr; });
+
+    var marksHtml = ['work', 'dayoff', 'sick', 'vacation'].map(function (k) {
+      var active = k === 'work' ? !mark : k === mark;
+      var icon = k === 'work' ? '#i-pencil' : CAL_MARK_ICON[k];
+      return '<button type="button" class="cal-mark-btn' + (active ? ' active' : '') + '" data-mark="' + k + '"><svg width="14" height="14"><use href="' + icon + '"></use></svg>' + CAL_MARK_FULL[k] + '</button>';
+    }).join('');
+
+    var itemsHtml = items.length ? items.map(function (it) {
+      return '<div class="cal-day-item' + (it.status !== 'pending' ? ' done' : '') + '" data-id="' + it.id + '">'
+        + '<button type="button" class="ico-btn ghost" data-action="cal-toggle" title="Отметить выполненной" aria-label="Отметить выполненной"><svg width="15" height="15"><use href="#i-check"></use></svg></button>'
+        + '<svg class="cal-type-icon" width="14" height="14"><use href="' + (CAL_TYPE_ICON[it.refType] || '#i-note') + '"></use></svg>'
+        + '<span class="cal-item-title">' + escapeHtml(it.label) + '</span>'
+        + '<button type="button" class="ico-btn ghost danger" data-action="cal-remove" title="Удалить" aria-label="Удалить"><svg width="14" height="14"><use href="#i-trash"></use></svg></button>'
+        + '</div>';
+    }).join('') : '<div class="cal-day-empty">На этот день ничего не назначено</div>';
+
+    panel.innerHTML = '<p class="cal-day-weekday">' + escapeHtml(weekday) + '</p>'
+      + '<p class="cal-day-date">' + escapeHtml(formatCalDate(dateStr)) + '</p>'
+      + '<p class="cal-day-label">Отметка дня</p>'
+      + '<div class="cal-marks">' + marksHtml + '</div>'
+      + '<p class="cal-day-label">Назначено на сегодня</p>'
+      + '<div class="cal-day-items">' + itemsHtml + '</div>';
+
+    panel.querySelectorAll('.cal-mark-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setDayMark(dateStr, btn.dataset.mark === 'work' ? null : btn.dataset.mark);
+        renderTodayInfo();
+        renderCalendarMonth();
+        persist();
+      });
+    });
+    panel.querySelectorAll('[data-action="cal-toggle"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('.cal-day-item').dataset.id;
+        completeCalendarItem(id, renderTodayInfo);
+      });
+    });
+    panel.querySelectorAll('[data-action="cal-remove"]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.closest('.cal-day-item').dataset.id;
+        state.calendar = state.calendar.filter(function (c) { return c.id !== id; });
+        renderTodayInfo();
+        renderCalendarMonth();
+        persist();
+      });
+    });
+  }
+
+  function renderTodayMedia() {
+    var el = document.getElementById('today-media-list');
+    if (!el) return;
+    var today = formatCalDate(todayISO());
+    var items = []
+      .concat(state.files.filter(function (f) { return f.addedAt.indexOf(today) === 0; }).map(function (f) { return { icon: '#i-clip', title: f.name, meta: f.addedAt }; }))
+      .concat(state.refs.filter(function (r) { return r.addedAt.indexOf(today) === 0; }).map(function (r) { return { icon: '#i-image', title: r.description || 'Референс', meta: r.addedAt }; }))
+      .concat(state.textures.filter(function (t) { return t.addedAt.indexOf(today) === 0; }).map(function (t) { return { icon: '#i-layers', title: 'Текстура', meta: t.addedAt }; }));
+    el.innerHTML = items.length ? items.map(function (it) {
+      return '<div class="file-item"><span class="file-ext"><svg width="14" height="14"><use href="' + it.icon + '"></use></svg></span>'
+        + '<div class="file-main"><div class="file-name">' + escapeHtml(it.title) + '</div><div class="file-meta">' + escapeHtml(it.meta) + '</div></div></div>';
+    }).join('') : '<p class="idea-empty">Сегодня ничего не добавлено.</p>';
   }
 
   function renderCalArchive() {
@@ -1602,7 +1690,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       panels.forEach(function (p) { p.hidden = (p.dataset.tab !== btn.dataset.tab); });
-      if (btn.dataset.tab === 'calendar') { renderCalendarMonth(); renderCalDayPanel(); renderTodayPanel(); renderTodayTasks(); }
+      if (btn.dataset.tab === 'calendar') { renderCalendarMonth(); renderCalDayPanel(); renderTodayInfo(); renderTodayTasks(); renderTodayMedia(); }
       window.scrollTo(0, 0);
     });
   });
@@ -1626,7 +1714,7 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
       btn.classList.add('active');
       btn.setAttribute('aria-selected', 'true');
       calSubpanels.forEach(function (p) { p.hidden = (p.dataset.calSubtab !== btn.dataset.calSubtab); });
-      if (btn.dataset.calSubtab === 'today') { renderTodayPanel(); renderTodayTasks(); }
+      if (btn.dataset.calSubtab === 'today') { renderTodayInfo(); renderTodayTasks(); renderTodayMedia(); }
     });
   });
 
