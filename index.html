@@ -1138,18 +1138,31 @@ footer{margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--line); fo
     });
   }
 
+  function isNonWorkDay(dateStr) {
+    var mark = getDayMark(dateStr);
+    return mark === 'dayoff' || mark === 'sick' || mark === 'vacation';
+  }
+
+  function addDaysISO(dateStr, n) {
+    var p = dateStr.split('-').map(Number);
+    var d = new Date(p[0], p[1] - 1, p[2] + n);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+
+  function nextWorkDayAfter(dateStr) {
+    var d = addDaysISO(dateStr, 1);
+    while (isNonWorkDay(d)) d = addDaysISO(d, 1);
+    return d;
+  }
+
   function archiveOverdueTasks() {
     var today = todayISO();
     var moved = false;
-    state.tasks = state.tasks.filter(function (t) {
+    state.tasks.forEach(function (t) {
       if (t.dueDate && t.dueDate < today) {
-        t.completedAt = nowStr();
-        t.archiveReason = 'overdue';
-        state.tasksArchive.unshift(t);
+        t.dueDate = nextWorkDayAfter(today);
         moved = true;
-        return false;
       }
-      return true;
     });
     return moved;
   }
